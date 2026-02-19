@@ -1,289 +1,418 @@
-# NIRMAY 🧬
-### _Precision Pharmacogenomics. Deterministic. Explainable. Clinician-Ready._
+<div align="center">
+
+<img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=700&size=38&duration=3000&pause=1000&color=06B6D4&center=true&vCenter=true&width=700&height=80&lines=🧬+NIRMAY;Precision+Pharmacogenomics;Deterministic.+Explainable.;Clinician-Ready." alt="NIRMAY Typing SVG" />
+
+### *निर्मय — Sanskrit for "free from disease"*
+
+> **Clinical-grade pharmacogenomics platform** that bridges a patient's genomic data and safer, evidence-based prescribing decisions — powered by deterministic CPIC logic and explainable AI.
+
+<br/>
+
+<!-- Tech Stack Badges -->
+![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Auth%20%2B%20Storage-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini-RAG%20Layer-4285F4?style=for-the-badge&logo=google&logoColor=white)
+![Pinecone](https://img.shields.io/badge/Pinecone-Vector%20DB-00C4B4?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-Containerised-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+
+<br/>
+
+<!-- Status Badges -->
+![Status](https://img.shields.io/badge/Status-Hackathon%20Build-06B6D4?style=flat-square)
+![License](https://img.shields.io/badge/License-Research%20Prototype-8B5CF6?style=flat-square)
+![CPIC](https://img.shields.io/badge/Guidelines-CPIC%20v3.0-EF4444?style=flat-square)
+![Genes](https://img.shields.io/badge/Drug--Gene%20Pairs-6%20Covered-10B981?style=flat-square)
+
+<br/>
+
+<!-- Navigation -->
+**[🧬 Features](#-key-features) • [🏗️ Architecture](#-system-architecture) • [🚀 Quick Start](#-running-the-project) • [🛡️ Security](#-security--ethics) • [🗺️ Roadmap](#-hackathon-scope--roadmap)**
 
 ---
 
-> **NIRMAY** (निर्मय) — Sanskrit for *free from disease*. A clinical-grade pharmacogenomics platform that bridges the gap between a patient's genomic data and safer, evidence-based prescribing decisions.
+</div>
+
+## 📋 Table of Contents
+
+| # | Section |
+|---|---------|
+| 1 | [💊 The Problem](#-the-problem) |
+| 2 | [⚕️ Our Solution — NIRMAY](#-our-solution--nirmay) |
+| 3 | [✨ Key Features](#-key-features) |
+| 4 | [🏗️ System Architecture](#-system-architecture) |
+| 5 | [🎨 UI/UX Philosophy](#-uiux-philosophy) |
+| 6 | [🛡️ Security & Ethics](#-security--ethics) |
+| 7 | [⚡ What Makes NIRMAY Different](#-what-makes-nirmay-different) |
+| 8 | [🔧 Tech Stack](#-tech-stack) |
+| 9 | [🗺️ Hackathon Scope & Roadmap](#-hackathon-scope--roadmap) |
+| 10 | [🚀 Running the Project](#-running-the-project) |
+| 11 | [⚠️ Disclaimer](#-disclaimer) |
 
 ---
 
-## The Problem
+## 💊 The Problem
 
-Every day, clinicians prescribe medications without knowing how a patient's genome will respond to them. This is not a rare edge case — it is the default.
+<div align="center">
 
-Adverse drug reactions (ADRs) account for approximately **700,000 emergency department visits in the United States annually**, and a significant proportion of these are genetically predictable. Drugs like Clopidogrel, Warfarin, Simvastatin, and Azathioprine have well-documented gene–drug interactions governed by enzymes such as CYP2C19, CYP2C9, SLCO1B1, and TPMT. Guidelines from CPIC (Clinical Pharmacogenomics Implementation Consortium) have existed for years. Yet at the point of care, this knowledge is almost never applied systematically.
+| Statistic | Reality |
+|-----------|---------|
+| 🏥 700,000 | Emergency visits per year from adverse drug reactions (US) |
+| 🧬 30–60% | Of ADRs are genetically predictable |
+| 💊 6+ drugs | With CPIC-grounded gene interaction guidelines (in use today) |
+| ❌ ~0% | Clinical workflows that check genomics at point of prescribing |
 
-The reasons are structural:
-- Genomic data is locked in raw VCF files that clinicians cannot interpret
-- Existing tools are either research-grade or enterprise cost-prohibitive
-- Most AI-based proposals are opaque — a clinician cannot explain *why* a recommendation was made
+</div>
 
-The consequence: patients receive the wrong drug, at the wrong dose, based entirely on population averages — not their biology.
+Every day, clinicians prescribe medications without knowing how a patient's genome will respond. This is not a rare edge case — **it is the default.**
 
----
+Drugs like **Clopidogrel, Warfarin, Simvastatin, and Azathioprine** have well-documented gene–drug interactions, governed by enzymes like **CYP2C19, CYP2C9, SLCO1B1, and TPMT**. The CPIC consortium has published actionable guidelines for years. Yet at the point of care, this knowledge is almost never applied.
 
-## Our Solution — NIRMAY
+**Why?**
+- 📁 Genomic data is locked in raw VCF files clinicians cannot interpret
+- 💰 Existing tools are research-grade or enterprise cost-prohibitive
+- 🕳️ Most AI proposals are opaque — a clinician cannot explain *why* a recommendation was made
+- ⏱️ Integration into clinical workflows is treated as a "later" problem
 
-NIRMAY is a purpose-built pharmacogenomics decision-support platform. It accepts a patient's Variant Call Format (VCF) genomic file, maps detected variants against a curated CPIC guideline database, and returns structured, interpretable clinical assessments — one drug at a time.
-
-The system is designed around three principles:
-
-**1. Determinism over probability.**  
-Clinical decisions cannot be left to probabilistic black boxes. NIRMAY's core engine is a rule-based system grounded in CPIC guidelines. Every risk flag is traceable to a specific rsID variant and a published guideline action. The output is auditable.
-
-**2. Explainability as a first-class feature.**  
-Each assessment surfaces the gene, the diplotype, the metabolizer phenotype, the risk rationale, and the recommended clinical action — not a score. A clinician reading the output understands *what* the finding means and *why* it matters.
-
-**3. Minimum necessary data.**  
-Genomic data is among the most sensitive personal information in existence. NIRMAY processes files through time-limited signed URLs and does not retain raw genomic sequences beyond the analysis window.
+The consequence: patients receive the wrong drug, at the wrong dose, based on population averages — not their biology.
 
 ---
 
-## Key Features
+## ⚕️ Our Solution — NIRMAY
 
-**Secure VCF Ingestion**
-- Client-side format validation before upload (VCFv4.x header check, column structure)
-- Files uploaded to isolated, private Supabase Storage buckets under user-scoped paths
-- Access controlled via 1-hour signed URLs — data is never directly exposed
+NIRMAY is a purpose-built pharmacogenomics decision-support platform. It accepts a patient's **VCF genomic file**, maps detected variants against a curated CPIC database, and returns **structured, interpretable clinical assessments** — one drug at a time.
 
-**CPIC-Grounded Risk Analysis**
-- Deterministic lookup against a curated pharmacogenomics database covering 6 high-impact drug–gene pairs: Simvastatin/SLCO1B1, Warfarin/CYP2C9, Clopidogrel/CYP2C19, Azathioprine/TPMT, Fluorouracil/DPYD, Codeine/CYP2D6
-- Risk stratification into Critical, High, Moderate, and Safe tiers with confidence scores
-- Equity-aware logic for ethnicity-linked variant considerations (e.g., rs12777823 for African ancestry Warfarin dosing)
-
-**Clinical-Grade User Interface**
-- Command-center dashboard designed around cognitive load reduction for clinical readers
-- Risk cards with progressive disclosure — summary visible at a glance, full genomic rationale available on expansion
-- Animated analysis pipeline with stage-by-stage feedback so users know where in the process the system is
-
-**Explainable AI Narrative Layer** *(implemented with guardrails)*
-- Retrieval-Augmented Generation (RAG) pipeline using Pinecone vector search over CPIC guideline text
-- Gemini-powered 3-sentence biological explanation grounded exclusively on retrieved clinical context
-- Model cascade fallback — if primary model is unavailable, the system degrades gracefully to alternative models, then to a deterministic fallback message
-- Explanations are constrained: the model is explicitly prohibited from recommending specific dosages
-
-**Audit Trail**
-- All upload events are logged to a `genomic_files` table with timestamps and processing status
-- Row-Level Security (RLS) on all tables — users can only access their own records
-
----
-
-## System Architecture
+The system is designed around three uncompromising principles:
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                         CLIENT (Browser)                         │
-│                                                                  │
-│   Next.js 14 App Router  ─────────────►  Supabase Auth (OAuth)  │
-│   /dashboard (protected)               Google Identity Provider  │
-│         │                                                        │
-│         │  VCF File (validated client-side)                      │
-│         ▼                                                        │
-│   Supabase Storage  ◄──── user-scoped path ────── Signed URL    │
-└───────────────────────────────┬──────────────────────────────────┘
-                                │  POST /api/analyze
-                                │  { vcf_url, drugs[] }
-                                ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                    Next.js API Route (Proxy)                     │
-│                    /app/api/analyze/route.js                     │
-│          Validates request, forwards to Python backend           │
-└───────────────────────────────┬──────────────────────────────────┘
-                                │  POST /api/v1/analyze-vcf
-                                ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                   FastAPI Backend (Python)                       │
-│                                                                  │
-│   bio_parser  ──►  Download VCF via signed URL                  │
-│       │             Parse variants with cyvcf2                   │
-│       │                                                          │
-│       ▼                                                          │
-│   rules_engine  ──►  CPIC rsID lookup                           │
-│       │              Risk + phenotype + clinical action          │
-│       │                                                          │
-│       ▼                                                          │
-│   rag_agent  ──►  Pinecone semantic search (CPIC text chunks)   │
-│                   Gemini LLM with constrained prompt             │
-│                   Returns { summary, citations, model_used }     │
-└───────────────────────────────┬──────────────────────────────────┘
-                                │  JSON response
-                                ▼
-                   Dashboard renders RiskResults
-                   (per drug: gene · diplotype · risk · action · explanation)
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│   🎯  DETERMINISM     Rules first. Every flag traces to an      │
+│                       rsID and a published CPIC action.         │
+│                                                                 │
+│   🔍  EXPLAINABILITY  Not a score — a reason. Gene, diplotype,  │
+│                       phenotype, evidence source, action.       │
+│                                                                 │
+│   🔒  PRIVACY         1-hour signed URLs. No permanent storage  │
+│                       of raw genomic sequences.                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-**Design principles:**
-- The Next.js frontend never directly calls the Python backend — all traffic routes through the Next.js API layer, preserving the backend as a private service
-- Each layer has a single, well-defined responsibility
-- The system degrades gracefully at every boundary — if the AI layer fails, the deterministic result is still returned
+---
+
+## ✨ Key Features
+
+<table>
+<tr>
+<td width="50%">
+
+### 🧬 Secure VCF Ingestion
+- Client-side format validation before upload
+- VCFv4.x header + column structure check
+- Files stored under user-scoped paths in private Supabase Storage
+- 1-hour signed URL — raw data never directly exposed
+
+</td>
+<td width="50%">
+
+### 🔬 CPIC-Grounded Risk Analysis
+- Deterministic lookup across **6 high-impact drug–gene pairs**
+- Risk tiers: `CRITICAL` → `HIGH` → `MODERATE` → `SAFE`
+- 0.95–0.99 confidence scores per finding
+- Equity-aware logic (e.g. rs12777823 for African ancestry Warfarin dosing)
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🖥️ Clinical-Grade UX
+- Command-center dashboard — dark, high-contrast, trust-first
+- Progressive disclosure — risk at a glance, evidence one click away
+- Animated pipeline feedback during analysis
+- Monospace typography for genomic identifiers
+
+</td>
+<td width="50%">
+
+### 🤖 Explainable AI Narratives
+- RAG pipeline: Pinecone semantic search over CPIC guideline text
+- Gemini-powered 3-sentence biological explanation per drug
+- Model cascade fallback — 6 model tiers before graceful degradation
+- Constrained prompts: model **cannot** recommend specific dosage
+
+</td>
+</tr>
+</table>
+
+<div align="center">
+
+#### Covered Drug–Gene Interactions
+
+| Drug | Gene | Risk Signal | Severity |
+|------|------|-------------|----------|
+| Simvastatin | SLCO1B1 | rs4149056 | 🔴 Critical — Rhabdomyolysis risk |
+| Warfarin | CYP2C9 | rs1799853, rs1057910 | 🟠 High — Hemorrhage risk |
+| Clopidogrel | CYP2C19 | rs4244285, rs4986893 | 🔴 Critical — Drug ineffective |
+| Azathioprine | TPMT | rs1142345, rs1800460 | 🔴 Critical — Severe toxicity |
+| Fluorouracil | DPYD | rs3918290 | 🔴 Critical — Fatal toxicity risk |
+| Codeine | CYP2D6 | rs3892097 | 🟠 High — Drug ineffective |
+
+</div>
 
 ---
 
-## UI/UX Philosophy
+## 🏗️ System Architecture
 
-NIRMAY is designed to feel like a clinical instrument, not a web app.
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                      BROWSER (Client)                           ║
+║                                                                  ║
+║   Next.js 14 App Router  ──────────►  Supabase Auth (OAuth)    ║
+║   /dashboard (protected)            Google Identity Provider    ║
+║         │                                                        ║
+║         │  VCF File (validated client-side)                     ║
+║         ▼                                                        ║
+║   Supabase Storage  ◄── user-scoped path ──── 1hr Signed URL   ║
+╚══════════════════════════╤═══════════════════════════════════════╝
+                           │  POST /api/analyze
+                           │  { vcf_url, drugs[] }
+                           ▼
+╔══════════════════════════════════════════════════════════════════╗
+║              Next.js API Route (Secure Proxy)                   ║
+║              Validates → Forwards → Returns                     ║
+╚══════════════════════════╤═══════════════════════════════════════╝
+                           │  POST /api/v1/analyze-vcf
+                           ▼
+╔══════════════════════════════════════════════════════════════════╗
+║                   FastAPI Backend (Python)                      ║
+║                                                                  ║
+║  📥 bio_parser   →  Download VCF via signed URL                 ║
+║                      Parse variants with cyvcf2                 ║
+║         │                                                        ║
+║  ⚙️  rules_engine →  CPIC rsID lookup                           ║
+║                      Risk + phenotype + clinical action         ║
+║         │                                                        ║
+║  🤖 rag_agent    →  Pinecone semantic search (CPIC chunks)      ║
+║                      Gemini constrained RAG explanation         ║
+║                      Returns { summary, citations, model }      ║
+╚══════════════════════════╤═══════════════════════════════════════╝
+                           │  JSON response
+                           ▼
+          🖥️  Dashboard renders RiskResults cards
+          (drug · gene · diplotype · risk · action · explanation)
+```
 
-The dashboard follows a **command-center aesthetic**: dark background, high-contrast data hierarchy, and tight information density. This is deliberate. Clinicians and researchers reading genetic risk data need to trust the interface before they trust the output. An interface that looks like a consumer app undermines that trust.
-
-Specific choices made:
-- **Progressive disclosure** — risk severity is communicated at a glance (colour + label); full genomic evidence is one click away. Cognitive load is minimized at the summary level.
-- **Monospace typography for genomic data** — rsIDs, diplotypes, and variant strings are rendered in monospace to reinforce precision and reduce misreading.
-- **Animated pipeline feedback** — the analysis pipeline stages (parse → rules → LLM → compile) are shown in sequence during processing. Users know the system is working, and *what* it is doing.
-- **State-driven layout** — the interface moves cleanly between: awaiting upload → processing → results, with no jarring reloads or modal interruptions.
+> **Design principle:** The frontend never calls the Python backend directly. All traffic routes through the Next.js proxy layer — the backend remains a private service at all times.
 
 ---
 
-## Security & Ethical Commitments 🛡️
+## 🎨 UI/UX Philosophy
 
-Genomic data is not ordinary health data. It is permanent, heritable, and uniquely identifying. NIRMAY is designed with this weight in mind.
+NIRMAY is designed to feel like a **clinical instrument**, not a web application.
 
-| Principle | Implementation |
+```
+🎯 Command-center aesthetic  →  Dark, high-contrast, trust-first
+📊 Progressive disclosure    →  Severity at a glance, evidence on demand
+⌨️  Monospace for genomics   →  rsIDs and diplotypes rendered precisely
+🔄 Animated pipeline         →  Users see each analysis stage in real time
+🎨 Color-coded risk tiers    →  CRITICAL (rose) · MODERATE (amber) · SAFE (emerald)
+📱 State-driven layout       →  Clean transitions between upload → analysis → results
+```
+
+> An interface that looks like a consumer app undermines clinical trust. NIRMAY's design communicates rigor before the user reads a single result.
+
+---
+
+## 🛡️ Security & Ethics
+
+Genomic data is **not ordinary health data**. It is permanent, heritable, and uniquely identifying. NIRMAY is designed with this weight in mind.
+
+| 🔐 Principle | Implementation |
 |---|---|
-| Minimum data retention | Raw VCF files are accessed via 1-hour signed URLs. NIRMAY does not store genomic sequences in any long-term database table. |
-| User-scoped isolation | Every file is stored under `{user_id}/{timestamp}_{filename}` in Supabase Storage. Storage RLS policies enforce that users cannot access each other's files. |
-| No public bucket exposure | The `vcf_uploads` bucket is private. All access requires a valid signed URL generated from an authenticated session. |
-| Least privilege | Database RLS ensures each user can only SELECT and INSERT their own records. No cross-user data access is possible at the application layer. |
-| Constrained AI output | The LLM is given a strict system prompt: explain the mechanism, cite the variant, do not recommend dosage. This prevents the model from generating actionable medical advice. |
-| Transparency | Every risk card surfaces its guideline source (CPIC), confidence score, and the specific variant(s) that triggered the flag. Nothing is hidden inside a score. |
+| **Minimum data retention** | Raw VCF files accessed via 1-hour signed URLs. No genomic sequences stored in any long-term table. |
+| **User-scoped isolation** | Every file stored under `{user_id}/{timestamp}_{filename}`. Storage RLS policies enforce user separation. |
+| **No public exposure** | `vcf_uploads` bucket is private. Access requires a valid signed URL from an authenticated session. |
+| **Least-privilege DB** | RLS ensures each user can only SELECT and INSERT their own records. Zero cross-user data access. |
+| **Constrained AI output** | LLM given strict system prompt: explain mechanism, cite variant, **do not recommend dosage**. |
+| **Full provenance** | Every risk card surfaces: guideline source (CPIC), confidence score, and triggering variant. Nothing is hidden inside a score. |
 
-NIRMAY is a decision-support tool. It surfaces evidence. The clinical decision remains with the clinician.
-
----
-
-## What Makes NIRMAY Different
-
-Most pharmacogenomics tools in the hackathon space fall into one of two traps: they are either pure rule-lookup tables with no intelligence layer, or they are LLM wrappers with no grounding in clinical evidence. NIRMAY deliberately occupies neither.
-
-**Determinism is the foundation, not a limitation.**  
-The rules engine is the medical source of truth. It does not guess, it does not estimate — it maps a variant to a CPIC-published outcome with 0.95–0.99 confidence. The AI layer adds explanatory language *around* this, not instead of it.
-
-**The AI layer is constrained by design.**  
-The Gemini model receives only retrieved CPIC text as its context and is explicitly told what it cannot do. It cannot recommend a dose. It cannot introduce external knowledge. This is not a limitation of the demo — it is the correct architecture for clinical AI.
-
-**The system is demonstrable end-to-end.**  
-The full pipeline — VCF upload → validation → analysis → risk card display — works in real time with a test VCF file. There are no mock responses served to judges. The output shown is the output produced.
-
-**The UX communicates trust.**  
-Clinical software needs to feel reliable. The design, information hierarchy, and error handling are all built with the assumption that a real clinician might one day interact with this system.
+> **NIRMAY is a decision-support tool. It surfaces evidence. The clinical decision remains with the clinician.**
 
 ---
 
-## Tech Stack
+## ⚡ What Makes NIRMAY Different
 
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js 14 (App Router, JSX, React Server Components) |
-| Styling | Tailwind CSS, Framer Motion |
-| Authentication | Supabase Auth — Google OAuth 2.0 |
-| Storage | Supabase Storage (private bucket, signed URLs) |
-| Database | Supabase PostgreSQL (RLS-enforced) |
-| API Proxy | Next.js Route Handlers |
-| Backend | Python 3.11, FastAPI, Uvicorn |
-| Bioinformatics | cyvcf2 (VCF parsing) |
-| Deterministic Engine | Custom CPIC rules engine (Python) |
-| Vector Search | Pinecone (`niramay-cpic` index, 768-dim embeddings) |
-| LLM | Google Gemini (constrained RAG, model cascade) |
-| Containerisation | Docker |
+<table>
+<tr>
+<td align="center" width="33%">
 
----
+### 🎯 Determinism First
 
-## Hackathon Scope & Roadmap
+The rules engine is the medical source of truth. It doesn't guess — it maps a variant to a CPIC-published outcome. Every result is auditable, reproducible, and explainable to a non-technical reviewer.
 
-### Phase 1 — Foundation ✅ Completed
-- Next.js 14 application with App Router
-- Google OAuth via Supabase, session persistence, protected routes
-- VCF upload pipeline: client-side validation → Supabase Storage → signed URL generation
-- Clinical dashboard UI with command-center aesthetic
+</td>
+<td align="center" width="33%">
 
-### Phase 2 — Deterministic Analysis Engine ✅ Completed
-- FastAPI backend with `/api/v1/analyze-vcf` endpoint
-- cyvcf2-based VCF parser
-- CPIC rules engine covering 6 drug–gene pairs with equity-aware logic
-- Next.js API proxy layer connecting frontend to backend
+### 🤖 AI With Guardrails
 
-### Phase 3 — Explainability Layer ✅ Implemented (with guardrails)
-- Pinecone vector index with CPIC guideline text chunks
-- Gemini-powered 3-sentence biological explanation per drug–gene pair
-- Constrained prompt engineering preventing unsupported medical claims
-- Model cascade fallback for resilience
+The Gemini model receives only retrieved CPIC text as context and is explicitly constrained. This is not a limitation — it is the **correct architecture** for clinical AI.
 
-### Phase 4 — Future Scope 🔭 Planned
-- Population-level genomic frequency overlays (gnomAD integration)
-- Multi-patient cohort analysis for institutional use
-- EHR system integration (HL7 FHIR-compatible output)
-- Polygenic risk score support
-- Clinical audit reports (PDF export)
-- Clinician annotation layer — human-in-the-loop review
+</td>
+<td align="center" width="33%">
+
+### 🎬 End-to-End Demo
+
+The full pipeline — VCF upload → validation → analysis → results — runs live during a demo. No mock responses. No hardcoded outputs. The output shown is the output produced.
+
+</td>
+</tr>
+</table>
 
 ---
 
-## Running the Project
+## 🔧 Tech Stack
+
+<div align="center">
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| 🖥️ **Frontend** | Next.js 14 (App Router) | Routing, SSR, API proxy |
+| 🎨 **Styling** | Tailwind CSS + Framer Motion | Design system + animations |
+| 🔐 **Auth** | Supabase Auth — Google OAuth 2.0 | Session management |
+| 🗄️ **Storage** | Supabase Storage (private bucket) | VCF file ingestion |
+| 💾 **Database** | Supabase PostgreSQL (RLS-enforced) | File metadata, audit trail |
+| ⚡ **Backend** | Python 3.11 + FastAPI + Uvicorn | Analysis engine |
+| 🧫 **Bioinformatics** | cyvcf2 | VCF parsing |
+| ⚙️ **Rules Engine** | Custom CPIC logic (Python) | Deterministic risk assessment |
+| 🔍 **Vector Search** | Pinecone (`niramay-cpic`, 768-dim) | RAG context retrieval |
+| 🤖 **LLM** | Google Gemini (model cascade) | Biological explanation generation |
+| 🐳 **Container** | Docker | Backend deployment |
+
+</div>
+
+---
+
+## 🗺️ Hackathon Scope & Roadmap
+
+```
+Phase 1 ──────────────────────────────────────── ✅ COMPLETE
+│
+├── Next.js 14 app with App Router
+├── Google OAuth via Supabase — session persistence
+├── VCF upload: client-side validation → Supabase Storage → signed URL
+└── Clinical dashboard UI (command-center aesthetic)
+
+Phase 2 ──────────────────────────────────────── ✅ COMPLETE
+│
+├── FastAPI backend with /api/v1/analyze-vcf
+├── cyvcf2-based VCF parser
+├── CPIC rules engine — 6 drug–gene pairs, equity-aware logic
+└── Next.js API proxy layer (frontend → backend isolation)
+
+Phase 3 ──────────────────────────────────────── ✅ COMPLETE (with guardrails)
+│
+├── Pinecone vector index with CPIC guideline chunks
+├── Gemini RAG: 3-sentence constrained biological explanation
+├── Model cascade fallback (6 model tiers)
+└── Citations + model provenance surfaced in UI
+
+Phase 4 ──────────────────────────────────────── 🔭 PLANNED
+│
+├── gnomAD population frequency overlays
+├── Multi-patient cohort analysis
+├── HL7 FHIR-compatible output for EHR integration
+├── Polygenic risk score support
+├── PDF clinical audit reports
+└── Clinician annotation — human-in-the-loop review
+```
+
+---
+
+## 🚀 Running the Project
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 18+ and npm
 - Python 3.11+
-- A Supabase project with Google OAuth and a `vcf_uploads` storage bucket
-- A `.env.local` file in `/niramay` and a `.env` file in `/backend`
+- Docker (optional, for containerised backend)
+- Supabase project with Google OAuth + `vcf_uploads` storage bucket
 
-### Frontend
+---
+
+### 🖥️ Frontend
 
 ```bash
 cd niramay
 npm install
 npm run dev
 ```
+Open **http://localhost:3000** — sign in with Google to access the dashboard.
 
-Open `http://localhost:3000`. Sign in with Google to access the dashboard.
+---
 
-### Backend
+### ⚡ Backend
 
-**Option A — Docker (recommended)**
+**Option A — Docker** *(recommended)*
 ```bash
 cd backend
 docker build -t niramay-backend .
 docker run -p 8000:8000 --env-file .env niramay-backend
 ```
 
-**Option B — Direct (development)**
+**Option B — Direct** *(fastest for local dev)*
 ```bash
 cd backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-### Environment Variables
+---
 
-`niramay/.env.local`
-```
+### 🔑 Environment Variables
+
+**`niramay/.env.local`**
+```env
 NEXT_PUBLIC_SUPABASE_URL=<your_supabase_url>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your_supabase_anon_key>
 BACKEND_URL=http://localhost:8000
 ```
 
-`backend/.env`
-```
+**`backend/.env`**
+```env
 GEMINI_API_KEY=<your_gemini_key>
 PINECONE_API_KEY=<your_pinecone_key>
 ```
 
-### Testing
+---
 
-A sample VCF file with high-risk variants (rs4149056, rs4244285) is provided at `testing/high_risk_sample.vcf` for end-to-end demo validation.
+### 🧪 Test File
+
+A sample VCF with high-risk variants (`rs4149056`, `rs4244285`) is at:
+```
+testing/high_risk_sample.vcf
+```
+Upload this file on the dashboard to trigger a live analysis and see CPIC risk cards generated end-to-end.
 
 ---
 
-## Disclaimer ⚕️
+## ⚠️ Disclaimer
 
-NIRMAY is a research and educational prototype developed for hackathon evaluation purposes. It is not a certified medical device, clinical decision support system, or therapeutic recommendation engine under any regulatory framework (FDA, CE, CDSCO, or equivalent).
-
-The system is designed to demonstrate software architecture, genomic data handling, and responsible AI integration in a clinical domain. It must not be used to inform real patient care decisions.
-
-All pharmacogenomic risk assessments produced by this system are for demonstration only.
+> NIRMAY is a **research and educational prototype** developed for hackathon evaluation.
+>
+> It is **not** a certified medical device, clinical decision support system, or therapeutic recommendation engine under any regulatory framework (FDA, CE, CDSCO, or equivalent).
+>
+> All pharmacogenomic assessments produced by this system are for **demonstration purposes only** and must not be used to inform real patient care decisions.
 
 ---
 
 <div align="center">
 
-**Built with clinical seriousness. Designed for the real world.**
+![Wave](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,14,22&height=120&section=footer&text=Built+with+clinical+seriousness.+Designed+for+the+real+world.&fontSize=16&fontColor=06B6D4&fontAlignY=65)
+
+**🧬 NIRMAY — Precision Pharmacogenomics**
+
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=nirmay.pharmacogenomics&left_color=0F172A&right_color=06B6D4)
 
 </div>
