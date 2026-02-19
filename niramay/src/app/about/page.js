@@ -118,12 +118,24 @@ function VideoBackground() {
         if (videoRef.current) videoRef.current.playbackRate = 0.65;
     };
 
+    /* Seamless manual loop: seek back before the video reaches its end
+       to avoid the blank-frame flicker that native loop causes. */
+    const handleTimeUpdate = () => {
+        const v = videoRef.current;
+        if (v && v.duration && v.currentTime > v.duration - 0.3) {
+            v.currentTime = 0;
+            v.play().catch(() => { });
+        }
+    };
+
     return (
         <video
             ref={videoRef}
-            autoPlay muted loop playsInline
+            autoPlay muted playsInline
+            preload="auto"
             onError={handleError}
             onCanPlay={handleCanPlay}
+            onTimeUpdate={handleTimeUpdate}
             poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect fill='%23312e81' width='1' height='1'/%3E%3C/svg%3E"
             style={{
                 position: "absolute", top: "50%", left: "50%",

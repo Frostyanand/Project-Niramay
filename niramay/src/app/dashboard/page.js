@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import VcfUploader from '@/components/VcfUploader';
 import AnalysisPanel from '@/components/dashboard/AnalysisPanel';
-import { LogOut, ArrowRight, Sparkles } from 'lucide-react';
+import { LogOut, ArrowRight, Sparkles, ShieldCheck, Cpu, FileSearch } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /* ══════════════════════════════════════════════════════════════════════════════
@@ -38,12 +38,23 @@ function VideoBackground() {
         if (videoRef.current) videoRef.current.playbackRate = 0.65;
     };
 
+    /* Seamless manual loop to avoid flicker */
+    const handleTimeUpdate = () => {
+        const v = videoRef.current;
+        if (v && v.duration && v.currentTime > v.duration - 0.3) {
+            v.currentTime = 0;
+            v.play().catch(() => { });
+        }
+    };
+
     return (
         <video
             ref={videoRef}
-            autoPlay muted loop playsInline
+            autoPlay muted playsInline
+            preload="auto"
             onError={handleError}
             onCanPlay={handleCanPlay}
+            onTimeUpdate={handleTimeUpdate}
             poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect fill='%23312e81' width='1' height='1'/%3E%3C/svg%3E"
             style={{
                 position: "absolute", top: "50%", left: "50%",
@@ -166,7 +177,7 @@ export default function Dashboard() {
 
                     {/* Centre nav links */}
                     <div className="hidden md:flex items-center gap-1">
-                        {[{ label: 'Home', href: '/' }, { label: 'About', href: '/about' }].map(({ label, href }) => (
+                        {[{ label: 'Home', href: '/' }, { label: 'About', href: '/about' }, { label: 'Features', href: '/#features' }].map(({ label, href }) => (
                             <Link
                                 key={label}
                                 href={href}
@@ -213,7 +224,7 @@ export default function Dashboard() {
             </header>
 
             {/* ── HERO PANEL ────────────────────────────────────────────────────────── */}
-            <section className="relative overflow-hidden" style={{ height: '38vh', minHeight: 260 }}>
+            <section className="relative overflow-hidden" style={{ height: '56vh', minHeight: 380 }}>
                 {/* Video */}
                 <div className="absolute inset-0">
                     <VideoBackground />
@@ -345,23 +356,73 @@ export default function Dashboard() {
 
                 {/* Bottom spacer / trust text */}
                 {!showAnalysis && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.6 }}
-                        className="flex items-center justify-center gap-6 pt-4"
-                    >
-                        {['CPIC Guidelines', 'End-to-End Encrypted', 'Evidence-Based'].map((badge) => (
-                            <span
-                                key={badge}
-                                className="flex items-center gap-1.5 text-xs font-medium"
-                                style={{ color: '#90e0ef' }}
-                            >
-                                <ArrowRight className="w-3 h-3" style={{ color: '#0096c7' }} />
-                                {badge}
-                            </span>
-                        ))}
-                    </motion.div>
+                    <>
+                        {/* ── HOW IT WORKS — 3 glass info cards ──────────────── */}
+                        <motion.section
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.7, delay: 0.3 }}
+                        >
+                            <div className="text-center mb-8">
+                                <p className="text-xs font-semibold uppercase tracking-[0.25em] mb-2" style={{ color: '#0096c7' }}>
+                                    How It Works
+                                </p>
+                                <h2 className="text-xl font-bold" style={{ color: '#03045e' }}>
+                                    Three steps to precision insights
+                                </h2>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                {[
+                                    { icon: FileSearch, title: 'Upload VCF', desc: 'Drag & drop your variant call file. We parse rsIDs and star alleles instantly.' },
+                                    { icon: Cpu, title: 'AI Analysis', desc: 'Our neuro-symbolic engine maps genotypes to drug metabolism phenotypes.' },
+                                    { icon: ShieldCheck, title: 'Clinical Report', desc: 'Receive CPIC-graded dosage guidance and adverse reaction risk scores.' },
+                                ].map((step, i) => (
+                                    <motion.div
+                                        key={step.title}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
+                                        className="p-6 rounded-2xl text-center transition-all duration-300 hover:-translate-y-1"
+                                        style={{
+                                            background: 'rgba(255,255,255,0.8)',
+                                            backdropFilter: 'blur(12px)',
+                                            border: '1px solid rgba(0,119,182,0.1)',
+                                            boxShadow: '0 4px 24px rgba(0,119,182,0.06)',
+                                        }}
+                                    >
+                                        <div
+                                            className="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-4"
+                                            style={{ background: 'rgba(0,119,182,0.08)' }}
+                                        >
+                                            <step.icon className="w-5 h-5" style={{ color: '#0077b6' }} strokeWidth={1.5} />
+                                        </div>
+                                        <h3 className="text-sm font-semibold mb-1.5" style={{ color: '#03045e' }}>{step.title}</h3>
+                                        <p className="text-xs leading-relaxed" style={{ color: '#90a0b0' }}>{step.desc}</p>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </motion.section>
+
+                        {/* ── TRUST BADGES ────────────────────────────────── */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.6 }}
+                            className="flex items-center justify-center gap-6 pt-4"
+                        >
+                            {['CPIC Guidelines', 'End-to-End Encrypted', 'Evidence-Based'].map((badge) => (
+                                <span
+                                    key={badge}
+                                    className="flex items-center gap-1.5 text-xs font-medium"
+                                    style={{ color: '#0096c7' }}
+                                >
+                                    <ArrowRight className="w-3 h-3" style={{ color: '#0077b6' }} />
+                                    {badge}
+                                </span>
+                            ))}
+                        </motion.div>
+                    </>
                 )}
             </main>
         </div>
