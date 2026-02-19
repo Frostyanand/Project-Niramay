@@ -54,49 +54,75 @@ function transformBackendData(backendResults) {
     });
 }
 
-// ─── Drug Selector Component ─────────────────────────────────────────────────
+// ─── Drug Selector ────────────────────────────────────────────────────────────
 function DrugSelector({ selectedDrugs, onToggle, customDrug, onCustomChange }) {
     return (
-        <div className="space-y-3">
-            <div className="flex items-center gap-2 mb-2">
-                <Pill className="w-4 h-4 text-cyan-400" />
-                <span className="text-xs uppercase tracking-widest text-slate-400 font-semibold">Select Drugs to Analyze</span>
+        <div style={{ marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                <Pill style={{ width: 15, height: 15, color: '#0077b6' }} />
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#023e8a' }}>
+                    Select Drugs to Analyse
+                </span>
             </div>
-            <div className="flex flex-wrap gap-2">
+
+            {/* Drug pills */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
                 {SUPPORTED_DRUGS.map(drug => {
                     const isSelected = selectedDrugs.includes(drug);
                     return (
                         <button
                             key={drug}
                             onClick={() => onToggle(drug)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wide border transition-all duration-200 ${isSelected
-                                ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300 shadow-[0_0_8px_rgba(6,182,212,0.15)]'
-                                : 'bg-slate-900/50 border-slate-700/50 text-slate-500 hover:border-slate-600 hover:text-slate-300'
-                                }`}
+                            style={{
+                                padding: '7px 16px',
+                                borderRadius: 999,
+                                fontSize: 11, fontWeight: 600,
+                                letterSpacing: '0.08em', textTransform: 'uppercase',
+                                cursor: 'pointer',
+                                transition: 'all 0.18s',
+                                border: isSelected ? 'none' : '1.5px solid rgba(0,119,182,0.25)',
+                                background: isSelected
+                                    ? 'linear-gradient(135deg, #0096c7, #0077b6)'
+                                    : 'rgba(240,249,255,0.8)',
+                                color: isSelected ? '#ffffff' : '#0096c7',
+                                boxShadow: isSelected ? '0 2px 12px rgba(0,119,182,0.25)' : 'none',
+                            }}
                         >
-                            {isSelected && <span className="mr-1">✓</span>}
+                            {isSelected && <span style={{ marginRight: 4 }}>✓</span>}
                             {drug}
                         </button>
                     );
                 })}
             </div>
-            <div className="flex items-center gap-2 mt-2">
-                <input
-                    type="text"
-                    placeholder="Or type custom drugs (comma-separated)..."
-                    value={customDrug}
-                    onChange={(e) => onCustomChange(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-700/50 text-xs text-slate-300 font-mono placeholder-slate-600 focus:outline-none focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20 transition-all"
-                />
-            </div>
-            <p className="text-[10px] text-slate-600 font-mono">
-                {selectedDrugs.length === 0 ? 'No drugs selected — all 6 will be analyzed by default' : `${selectedDrugs.length} drug(s) selected`}
+
+            {/* Custom drug input */}
+            <input
+                type="text"
+                placeholder="Or type custom drugs (comma-separated)..."
+                value={customDrug}
+                onChange={(e) => onCustomChange(e.target.value)}
+                style={{
+                    width: '100%', padding: '10px 14px',
+                    borderRadius: 10, fontSize: 12,
+                    border: '1.5px solid rgba(0,119,182,0.18)',
+                    background: 'rgba(240,249,255,0.8)',
+                    color: '#03045e', outline: 'none',
+                    fontFamily: 'monospace',
+                    boxSizing: 'border-box',
+                }}
+                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(0,119,182,0.5)'; }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(0,119,182,0.18)'; }}
+            />
+            <p style={{ fontSize: 10, color: '#90e0ef', marginTop: 6, fontFamily: 'monospace' }}>
+                {selectedDrugs.length === 0
+                    ? 'No drugs selected — all 6 will be analysed by default'
+                    : `${selectedDrugs.length} drug(s) selected`}
             </p>
         </div>
     );
 }
 
-// ─── Status stages for the visual pipeline ───────────────────────────────────
+// ─── Pipeline stages ──────────────────────────────────────────────────────────
 const PIPELINE_STAGES = [
     { id: 'fetch', label: 'Fetching genomic sequence from vault...' },
     { id: 'parse', label: 'Parsing variant call format data...' },
@@ -107,18 +133,26 @@ const PIPELINE_STAGES = [
 
 function AnalysisLoadingState({ stage }) {
     return (
-        <div className="flex flex-col items-center justify-center p-10 min-h-[300px] w-full gap-6">
-            <div className="relative">
-                <div className="absolute inset-0 bg-cyan-500/20 blur-2xl rounded-full animate-pulse" />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 24px', gap: 32, minHeight: 260 }}>
+            <div style={{ position: 'relative' }}>
+                <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'rgba(0,119,182,0.15)',
+                    filter: 'blur(24px)', borderRadius: '50%',
+                }} />
                 <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
-                    className="relative z-10"
+                    style={{ position: 'relative', zIndex: 10 }}
                 >
-                    <Dna className="w-12 h-12 text-cyan-400 drop-shadow-[0_0_12px_rgba(34,211,238,0.6)]" strokeWidth={1} />
+                    <Dna
+                        strokeWidth={1}
+                        style={{ width: 48, height: 48, color: '#0077b6', filter: 'drop-shadow(0 0 10px rgba(0,119,182,0.4))' }}
+                    />
                 </motion.div>
             </div>
-            <div className="w-full max-w-sm space-y-3">
+
+            <div style={{ width: '100%', maxWidth: 360, display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {PIPELINE_STAGES.map((s, i) => {
                     const isDone = i < stage;
                     const isCurrent = i === stage;
@@ -126,24 +160,34 @@ function AnalysisLoadingState({ stage }) {
                         <motion.div
                             key={s.id}
                             initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: isDone || isCurrent ? 1 : 0.25, x: 0 }}
+                            animate={{ opacity: isDone || isCurrent ? 1 : 0.2, x: 0 }}
                             transition={{ delay: i * 0.08 }}
-                            className="flex items-center gap-3"
+                            style={{ display: 'flex', alignItems: 'center', gap: 12 }}
                         >
-                            <div className={`flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-all ${isDone
-                                ? 'bg-emerald-500 border-emerald-400'
-                                : isCurrent
-                                    ? 'border-cyan-400 bg-cyan-950'
-                                    : 'border-slate-700 bg-slate-900'
-                                }`}>
+                            <div style={{
+                                flexShrink: 0, width: 16, height: 16, borderRadius: '50%',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                border: isDone ? 'none' : isCurrent ? '1.5px solid #0077b6' : '1.5px solid rgba(0,119,182,0.2)',
+                                background: isDone ? '#0077b6' : isCurrent ? 'rgba(0,119,182,0.08)' : '#f0f9ff',
+                                transition: 'all 0.3s',
+                            }}>
                                 {isDone && (
-                                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-1.5 h-1.5 rounded-full bg-emerald-200" />
+                                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}
+                                        style={{ width: 6, height: 6, borderRadius: '50%', background: '#ffffff' }} />
                                 )}
                                 {isCurrent && (
-                                    <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1.2, repeat: Infinity }} className="w-1.5 h-1.5 rounded-full bg-cyan-300" />
+                                    <motion.div
+                                        animate={{ opacity: [0.4, 1, 0.4] }}
+                                        transition={{ duration: 1.2, repeat: Infinity }}
+                                        style={{ width: 6, height: 6, borderRadius: '50%', background: '#0077b6' }}
+                                    />
                                 )}
                             </div>
-                            <span className={`text-xs font-mono transition-colors ${isDone ? 'text-emerald-400' : isCurrent ? 'text-cyan-300' : 'text-slate-600'}`}>
+                            <span style={{
+                                fontSize: 12, fontFamily: 'monospace',
+                                color: isDone ? '#0077b6' : isCurrent ? '#023e8a' : '#90e0ef',
+                                transition: 'color 0.3s',
+                            }}>
                                 {s.label}
                             </span>
                         </motion.div>
@@ -159,20 +203,19 @@ function AnalysisErrorState({ message, isOffline, onRetry }) {
         <motion.div
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center justify-center p-10 min-h-[300px] gap-5 text-center"
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 24px', gap: 20, textAlign: 'center', minHeight: 260 }}
         >
-            <div className="p-4 rounded-full bg-rose-950/30 border border-rose-500/20">
-                {isOffline ? (
-                    <ServerCrash className="w-8 h-8 text-rose-400" strokeWidth={1.5} />
-                ) : (
-                    <AlertCircle className="w-8 h-8 text-rose-400" strokeWidth={1.5} />
-                )}
+            <div style={{ padding: 16, borderRadius: '50%', background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)' }}>
+                {isOffline
+                    ? <ServerCrash strokeWidth={1.5} style={{ width: 32, height: 32, color: '#ef4444' }} />
+                    : <AlertCircle strokeWidth={1.5} style={{ width: 32, height: 32, color: '#ef4444' }} />
+                }
             </div>
             <div>
-                <h4 className="text-sm font-semibold text-rose-300 uppercase tracking-widest mb-2">
+                <h4 style={{ fontSize: 12, fontWeight: 700, color: '#dc2626', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
                     {isOffline ? 'AI Engine Offline' : 'Analysis Failed'}
                 </h4>
-                <p className="text-xs text-rose-400/80 max-w-xs leading-relaxed font-mono">
+                <p style={{ fontSize: 12, color: '#f87171', maxWidth: 320, lineHeight: 1.7, fontFamily: 'monospace' }}>
                     {isOffline
                         ? 'The Python inference engine is not reachable. Ensure the backend service is running on port 8000.'
                         : message || 'An unknown error occurred during analysis.'}
@@ -181,7 +224,15 @@ function AnalysisErrorState({ message, isOffline, onRetry }) {
             {onRetry && (
                 <button
                     onClick={onRetry}
-                    className="px-5 py-2 rounded-lg text-xs uppercase tracking-widest font-medium text-cyan-400 border border-cyan-500/30 hover:bg-cyan-950/40 hover:border-cyan-500/60 transition-all"
+                    style={{
+                        padding: '8px 20px', borderRadius: 999, fontSize: 11,
+                        textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 600,
+                        color: '#0077b6', border: '1.5px solid rgba(0,119,182,0.3)',
+                        background: 'transparent', cursor: 'pointer',
+                        transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#0077b6'; e.currentTarget.style.color = '#fff'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#0077b6'; }}
                 >
                     Retry Analysis
                 </button>
@@ -190,7 +241,7 @@ function AnalysisErrorState({ message, isOffline, onRetry }) {
     );
 }
 
-// ─── Main Analysis Panel Component ───────────────────────────────────────────
+// ─── Main Analysis Panel ──────────────────────────────────────────────────────
 export default function AnalysisPanel({ vcfUrl, drugs: initialDrugs, onReset }) {
     const [status, setStatus] = useState('idle'); // idle | selecting | analyzing | done | error
     const [pipelineStage, setPipelineStage] = useState(0);
@@ -199,14 +250,11 @@ export default function AnalysisPanel({ vcfUrl, drugs: initialDrugs, onReset }) 
     const [error, setError] = useState(null);
     const [isOffline, setIsOffline] = useState(false);
 
-    // Drug selection state
     const [selectedDrugs, setSelectedDrugs] = useState(SUPPORTED_DRUGS);
     const [customDrug, setCustomDrug] = useState('');
 
     useEffect(() => {
-        if (vcfUrl) {
-            setStatus('selecting');
-        }
+        if (vcfUrl) setStatus('selecting');
     }, [vcfUrl]);
 
     const handleToggleDrug = (drug) => {
@@ -271,21 +319,16 @@ export default function AnalysisPanel({ vcfUrl, drugs: initialDrugs, onReset }) 
         }
     };
 
-    const handleRetry = () => {
-        runAnalysis();
-    };
+    const handleRetry = () => runAnalysis();
 
-    // ── Render ────────────────────────────────────────────────────────────────
     return (
-        <div className="w-full">
+        <div style={{ width: '100%' }}>
             <AnimatePresence mode="wait">
+
                 {status === 'selecting' && (
                     <motion.div
                         key="selecting"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="space-y-6"
+                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
                     >
                         <DrugSelector
                             selectedDrugs={selectedDrugs}
@@ -293,10 +336,19 @@ export default function AnalysisPanel({ vcfUrl, drugs: initialDrugs, onReset }) 
                             customDrug={customDrug}
                             onCustomChange={setCustomDrug}
                         />
-                        <div className="flex justify-end">
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                             <button
                                 onClick={runAnalysis}
-                                className="px-6 py-2.5 rounded-lg text-xs uppercase tracking-widest font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] transition-all duration-300"
+                                style={{
+                                    padding: '12px 32px', borderRadius: 999, fontSize: 12,
+                                    fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
+                                    color: '#ffffff', border: 'none', cursor: 'pointer',
+                                    background: 'linear-gradient(135deg, #0096c7, #0077b6)',
+                                    boxShadow: '0 4px 20px rgba(0,119,182,0.35)',
+                                    transition: 'all 0.2s',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 6px 28px rgba(0,119,182,0.5)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,119,182,0.35)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                             >
                                 ▶ Run Analysis
                             </button>
@@ -305,47 +357,44 @@ export default function AnalysisPanel({ vcfUrl, drugs: initialDrugs, onReset }) 
                 )}
 
                 {status === 'analyzing' && (
-                    <motion.div
-                        key="loading"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
+                    <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                         <AnalysisLoadingState stage={pipelineStage} />
                     </motion.div>
                 )}
 
                 {status === 'error' && (
-                    <motion.div
-                        key="error"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
-                        <AnalysisErrorState
-                            message={error}
-                            isOffline={isOffline}
-                            onRetry={handleRetry}
-                        />
+                    <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <AnalysisErrorState message={error} isOffline={isOffline} onRetry={handleRetry} />
                     </motion.div>
                 )}
 
                 {status === 'done' && results && (
                     <motion.div
                         key="results"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
+                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
                     >
-                        {/* Report header */}
-                        <div className="flex items-center gap-3 mb-5 pb-4 border-b border-cyan-500/10">
-                            <FlaskConical className="w-4 h-4 text-cyan-400" />
-                            <p className="text-xs font-mono text-cyan-300/70 flex-1">
-                                Analysis complete — {results.length} drug-gene interactions assessed
+                        {/* Results header */}
+                        <div style={{
+                            display: 'flex', alignItems: 'center', gap: 12,
+                            marginBottom: 20, paddingBottom: 16,
+                            borderBottom: '1px solid rgba(0,119,182,0.1)',
+                        }}>
+                            <FlaskConical style={{ width: 15, height: 15, color: '#0077b6' }} />
+                            <p style={{ fontSize: 12, fontFamily: 'monospace', color: '#0096c7', flex: 1 }}>
+                                Analysis complete — {results.length} drug-gene interaction{results.length !== 1 ? 's' : ''} assessed
                             </p>
                             <button
                                 onClick={onReset}
-                                className="text-[10px] text-slate-500 hover:text-cyan-400 uppercase tracking-widest transition-colors border border-slate-800 hover:border-cyan-500/30 rounded px-2 py-1"
+                                style={{
+                                    fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em',
+                                    fontWeight: 600, color: '#90a0b0',
+                                    border: '1px solid rgba(0,119,182,0.15)',
+                                    borderRadius: 6, padding: '4px 10px',
+                                    background: 'transparent', cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.color = '#0077b6'; e.currentTarget.style.borderColor = 'rgba(0,119,182,0.4)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.color = '#90a0b0'; e.currentTarget.style.borderColor = 'rgba(0,119,182,0.15)'; }}
                             >
                                 New Scan
                             </button>
@@ -354,8 +403,8 @@ export default function AnalysisPanel({ vcfUrl, drugs: initialDrugs, onReset }) 
                         <RiskResults data={results} rawResponse={rawResponse} />
                     </motion.div>
                 )}
+
             </AnimatePresence>
         </div>
     );
 }
-

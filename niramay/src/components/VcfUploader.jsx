@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { createClient } from '@/lib/supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UploadCloud, FileCheck2, Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
+import { UploadCloud, Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
 
 export default function VcfUploader({ onUploadComplete }) {
     const supabase = createClient();
@@ -71,7 +71,7 @@ export default function VcfUploader({ onUploadComplete }) {
             setUploadProgress('Generating secure signed URL...');
             const { data: signedUrlData, error: urlError } = await supabase.storage
                 .from('vcf_uploads')
-                .createSignedUrl(filePath, 3600); // 1-hour token
+                .createSignedUrl(filePath, 3600);
 
             if (urlError) throw urlError;
 
@@ -87,12 +87,11 @@ export default function VcfUploader({ onUploadComplete }) {
                 });
 
             if (dbError) {
-                // Non-critical: log the DB error but don't block the analysis flow
                 console.warn('Could not save file metadata to DB:', dbError.message);
             }
 
             setUploadProgress('Dispatching to AI inference engine...');
-            if (onUploadComplete) onUploadComplete(signedUrlData.signedUrl);
+            if (onUploadComplete) onUploadComplete(signedUrlData.signedUrl, file.name);
 
         } catch (err) {
             console.error('Upload failed:', err);
@@ -103,96 +102,108 @@ export default function VcfUploader({ onUploadComplete }) {
         }
     };
 
-    const handleFileInputChange = (e) => {
-        processFile(e.target.files?.[0]);
-    };
-
+    const handleFileInputChange = (e) => processFile(e.target.files?.[0]);
     const handleDrop = (e) => {
         e.preventDefault();
         setIsDragging(false);
         const file = e.dataTransfer.files?.[0];
         if (file) processFile(file);
     };
-
     const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
     const handleDragLeave = () => setIsDragging(false);
 
     return (
-        <div className="flex flex-col items-center justify-center w-full h-full gap-4 py-4">
+        <div className="flex flex-col w-full gap-5">
+
             {/* Drop Zone */}
             <motion.div
                 animate={isDragging
-                    ? { scale: 1.02, borderColor: 'rgba(6, 182, 212, 0.7)' }
-                    : { scale: 1, borderColor: 'rgba(6, 182, 212, 0.2)' }}
+                    ? { scale: 1.02, borderColor: 'rgba(0,119,182,0.6)' }
+                    : { scale: 1, borderColor: 'rgba(0,119,182,0.2)' }
+                }
                 transition={{ duration: 0.2 }}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onClick={() => !uploading && fileInputRef.current?.click()}
-                className={`
-                    relative w-full border-2 border-dashed rounded-xl
-                    flex flex-col items-center justify-center gap-4 p-8
-                    cursor-pointer group transition-colors duration-300
-                    min-h-[200px]
-                    ${isDragging
-                        ? 'bg-cyan-950/30'
-                        : 'bg-slate-900/50 hover:bg-cyan-950/10 hover:border-cyan-500/50'
-                    }
-                `}
+                style={{
+                    border: '2px dashed rgba(0,119,182,0.22)',
+                    borderRadius: 16,
+                    background: isDragging ? 'rgba(0,119,182,0.05)' : 'rgba(240,249,255,0.8)',
+                    cursor: uploading ? 'default' : 'pointer',
+                    minHeight: 200,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 16,
+                    padding: '2.5rem',
+                    transition: 'background 0.2s',
+                }}
             >
-                {/* Animated background glow on drag */}
-                <AnimatePresence>
-                    {isDragging && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-cyan-500/5 rounded-xl pointer-events-none"
-                        />
-                    )}
-                </AnimatePresence>
+                <AnimatePresence>{isDragging && (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        style={{ position: 'absolute', inset: 0, background: 'rgba(0,119,182,0.04)', borderRadius: 16, pointerEvents: 'none' }}
+                    />
+                )}</AnimatePresence>
 
                 {/* Icon */}
-                <div className="relative">
-                    <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-full group-hover:bg-cyan-500/30 transition-colors" />
+                <div style={{ position: 'relative' }}>
+                    <div style={{
+                        position: 'absolute', inset: 0,
+                        background: 'rgba(0,119,182,0.12)',
+                        filter: 'blur(16px)', borderRadius: '50%',
+                    }} />
                     <motion.div
-                        animate={isDragging ? { y: -4 } : { y: 0 }}
-                        transition={{ duration: 0.3, type: 'spring' }}
-                        className="relative w-14 h-14 rounded-xl bg-slate-800/80 border border-cyan-500/20 flex items-center justify-center group-hover:border-cyan-500/50 transition-colors"
+                        animate={isDragging ? { y: -5 } : { y: 0 }}
+                        transition={{ type: 'spring', duration: 0.3 }}
+                        style={{
+                            position: 'relative',
+                            width: 56, height: 56, borderRadius: 14,
+                            background: '#ffffff',
+                            border: '1.5px solid rgba(0,119,182,0.2)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 4px 20px rgba(0,119,182,0.1)',
+                        }}
                     >
-                        <UploadCloud className="w-7 h-7 text-cyan-400" strokeWidth={1.5} />
+                        <UploadCloud strokeWidth={1.5} style={{ width: 26, height: 26, color: '#0077b6' }} />
                     </motion.div>
                 </div>
 
                 {/* Text */}
-                <div className="text-center space-y-1">
-                    <p className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">
-                        {isDragging ? 'Release to upload sequence' : 'Drop VCF file here'}
+                <div style={{ textAlign: 'center' }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: '#03045e', marginBottom: 4 }}>
+                        {isDragging ? 'Release to upload sequence' : 'Drop your VCF file here'}
                     </p>
-                    <p className="text-xs text-slate-500">
-                        or <span className="text-cyan-400 underline underline-offset-2">browse files</span>
+                    <p style={{ fontSize: 12, color: '#90e0ef' }}>
+                        or <span style={{ color: '#0077b6', textDecoration: 'underline', textUnderlineOffset: 2 }}>browse files</span>
                     </p>
                 </div>
 
-                {/* Constraints */}
-                <div className="flex items-center gap-3 mt-2">
-                    <span className="flex items-center gap-1.5 text-[10px] font-mono text-slate-600 border border-slate-800 rounded px-2 py-1">
-                        <ShieldCheck className="w-3 h-3 text-cyan-700" />
-                        VCFv4.x format
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-600 border border-slate-800 rounded px-2 py-1">
-                        Max 5 MB
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-600 border border-slate-800 rounded px-2 py-1">
-                        End-to-end encrypted
-                    </span>
+                {/* Constraint badges */}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginTop: 4 }}>
+                    {[
+                        { icon: <ShieldCheck style={{ width: 11, height: 11, color: '#0077b6' }} />, label: 'VCFv4.x format' },
+                        { label: 'Max 5 MB' },
+                        { label: 'End-to-end encrypted' },
+                    ].map(({ icon, label }) => (
+                        <span key={label} style={{
+                            display: 'flex', alignItems: 'center', gap: 5,
+                            fontSize: 10, color: '#90e0ef',
+                            border: '1px solid rgba(0,119,182,0.15)',
+                            borderRadius: 6, padding: '3px 8px',
+                            background: 'rgba(0,119,182,0.04)',
+                        }}>
+                            {icon}{label}
+                        </span>
+                    ))}
                 </div>
             </motion.div>
 
             {/* Hidden file input */}
             <input
-                type="file"
-                accept=".vcf"
+                type="file" accept=".vcf"
                 ref={fileInputRef}
                 onChange={handleFileInputChange}
                 disabled={uploading}
@@ -200,24 +211,29 @@ export default function VcfUploader({ onUploadComplete }) {
                 id="vcf-file-input"
             />
 
-            {/* Upload Status */}
+            {/* Status Messages */}
             <AnimatePresence mode="wait">
                 {uploading && (
                     <motion.div
                         key="uploading"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        className="flex items-center gap-3 w-full px-4 py-3 rounded-lg bg-cyan-950/20 border border-cyan-500/20"
+                        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: 12,
+                            padding: '14px 18px', borderRadius: 12,
+                            background: 'rgba(0,119,182,0.07)',
+                            border: '1px solid rgba(0,119,182,0.18)',
+                        }}
                     >
-                        <Loader2 className="w-4 h-4 text-cyan-400 animate-spin flex-shrink-0" />
-                        <div className="flex-1">
-                            <p className="text-xs text-cyan-300 font-mono">{uploadProgress}</p>
-                            <div className="mt-1.5 h-0.5 w-full bg-slate-800 rounded overflow-hidden">
+                        <Loader2 style={{ width: 16, height: 16, color: '#0077b6', flexShrink: 0 }} className="animate-spin" />
+                        <div style={{ flex: 1 }}>
+                            <p style={{ fontSize: 12, color: '#023e8a', fontFamily: 'monospace' }}>
+                                {uploadProgress}
+                            </p>
+                            <div style={{ marginTop: 8, height: 2, background: 'rgba(0,119,182,0.12)', borderRadius: 2, overflow: 'hidden' }}>
                                 <motion.div
-                                    className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 rounded"
-                                    animate={{ width: ['20%', '80%', '95%'] }}
-                                    transition={{ duration: 3, ease: 'easeInOut', repeat: Infinity, repeatType: 'loop' }}
+                                    style={{ height: '100%', background: 'linear-gradient(90deg, #0096c7, #0077b6)', borderRadius: 2 }}
+                                    animate={{ width: ['15%', '80%', '95%'] }}
+                                    transition={{ duration: 3.5, ease: 'easeInOut', repeat: Infinity, repeatType: 'loop' }}
                                 />
                             </div>
                         </div>
@@ -227,18 +243,21 @@ export default function VcfUploader({ onUploadComplete }) {
                 {error && !uploading && (
                     <motion.div
                         key="error"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        className="flex items-start gap-3 w-full px-4 py-3 rounded-lg bg-rose-950/20 border border-rose-500/30"
+                        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                        style={{
+                            display: 'flex', alignItems: 'flex-start', gap: 12,
+                            padding: '14px 18px', borderRadius: 12,
+                            background: 'rgba(239,68,68,0.05)',
+                            border: '1px solid rgba(239,68,68,0.2)',
+                        }}
                     >
-                        <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+                        <AlertCircle style={{ width: 16, height: 16, color: '#ef4444', flexShrink: 0, marginTop: 1 }} />
                         <div>
-                            <p className="text-xs font-medium text-rose-300">Upload Failed</p>
-                            <p className="text-xs text-rose-400/80 mt-0.5 font-mono">{error}</p>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: '#dc2626' }}>Upload Failed</p>
+                            <p style={{ fontSize: 11, color: '#f87171', marginTop: 2, fontFamily: 'monospace' }}>{error}</p>
                             <button
                                 onClick={() => { setError(null); fileInputRef.current?.click(); }}
-                                className="mt-2 text-[10px] text-rose-400 hover:text-rose-200 underline underline-offset-2"
+                                style={{ marginTop: 8, fontSize: 10, color: '#0077b6', textDecoration: 'underline', textUnderlineOffset: 2, background: 'none', border: 'none', cursor: 'pointer' }}
                             >
                                 Try again
                             </button>
