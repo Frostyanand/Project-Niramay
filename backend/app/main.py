@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()  # loads backend/.env → populates os.environ before any service initializes
+
 from fastapi import FastAPI, HTTPException
 from app.models import AnalysisRequest
 from app.services import bio_parser, rules_engine, rag_agent

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     AlertTriangle, CheckCircle, Info, ChevronDown,
-    ChevronUp, Download, Copy, FileJson, Activity
+    ChevronUp, Download, Copy, FileJson, Activity, FlaskConical, BookOpen
 } from 'lucide-react';
 import { EmptyState } from '@/components/dashboard/StatusStates';
 
@@ -133,16 +133,22 @@ export default function RiskResults({ data }) {
                                             {styles.icon}
                                         </div>
                                         <div>
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-3 flex-wrap">
                                                 <h4 className="text-slate-100 font-medium tracking-wide">
                                                     {item.gene}
                                                 </h4>
+                                                {item.drug && (
+                                                    <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-400 font-mono bg-slate-950/50">
+                                                        <FlaskConical className="w-2.5 h-2.5" />
+                                                        {item.drug}
+                                                    </span>
+                                                )}
                                                 <span className={`text-[10px] px-2 py-0.5 rounded border ${styles.border} ${styles.text} font-mono uppercase bg-slate-950/50`}>
                                                     {item.riskLevel}
                                                 </span>
                                             </div>
                                             <p className="text-xs text-slate-400 mt-1 font-mono">
-                                                Variant: {item.variant}
+                                                {item.phenotype} · Variant: {item.variant}
                                             </p>
                                         </div>
                                     </div>
@@ -180,11 +186,31 @@ export default function RiskResults({ data }) {
                                                             <p className="text-slate-300">{item.phenotype}</p>
                                                         </div>
                                                         <div>
-                                                            <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Recommendation</span>
-                                                            <p className={`text-xs ${styles.text} bg-slate-950/50 p-2 rounded border border-white/5`}>
+                                                            <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Clinical Action</span>
+                                                            <p className={`text-xs ${styles.text} bg-slate-950/50 p-2 rounded border border-white/5 leading-relaxed`}>
                                                                 {item.recommendation}
                                                             </p>
                                                         </div>
+                                                        {(item.confidence || item.guidelineSource) && (
+                                                            <div className="flex items-center gap-3 mt-1 flex-wrap">
+                                                                {item.confidence && (
+                                                                    <span className="text-[10px] font-mono text-slate-600 border border-slate-800 rounded px-2 py-0.5">
+                                                                        Confidence: {(item.confidence * 100).toFixed(0)}%
+                                                                    </span>
+                                                                )}
+                                                                {item.guidelineSource && (
+                                                                    <span className="flex items-center gap-1 text-[10px] font-mono text-slate-600 border border-slate-800 rounded px-2 py-0.5">
+                                                                        <BookOpen className="w-2.5 h-2.5" />
+                                                                        {item.guidelineSource}
+                                                                    </span>
+                                                                )}
+                                                                {item.citations && item.citations.map((c, i) => (
+                                                                    <span key={i} className="text-[10px] font-mono text-cyan-700/60 border border-cyan-900/30 rounded px-2 py-0.5">
+                                                                        {c}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>

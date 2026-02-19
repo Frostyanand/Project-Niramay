@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -8,56 +8,21 @@ import VcfUploader from '@/components/VcfUploader';
 import {
     FileText, User, Activity, LogOut,
     Thermometer, Shield, Grid, Zap,
-    Microscope, Dna
+    Microscope, Dna, CheckCircle2
 } from 'lucide-react';
-import RiskResults from '@/components/dashboard/RiskResults';
 import GlassPanel from '@/components/dashboard/GlassPanel';
 import StatCard from '@/components/dashboard/StatCard';
-import { UploadErrorState, InvalidFileState, AuthExpiredState, LoadingState } from '@/components/dashboard/StatusStates';
-
-// Mock Clinical Data
-const mockRiskData = [
-    {
-        id: '1',
-        gene: 'BRCA1',
-        variant: 'c.5266dupC (p.Gln1756Profs)',
-        riskLevel: 'HIGH',
-        phenotype: 'Hereditary Ovarian Cancer',
-        description: 'This pathogenic variant is associated with a significantly increased lifetime risk of developing breast and ovarian cancer. The variant results in a premature translational stop signal, which is predicted to result in an absent or disrupted protein product.',
-        recommendation: 'Immediate oncological counseling recommended. Consider enhanced surveillance protocols including annual MRI and mammography.'
-    },
-    {
-        id: '2',
-        gene: 'CYP2C19',
-        variant: '*2/*17',
-        riskLevel: 'MODERATE',
-        phenotype: 'Intermediate Metabolizer',
-        description: 'Individual carries one loss-of-function allele and one gain-of-function allele. Metabolism of drugs such as clopidogrel and voriconazole may be unpredictable.',
-        recommendation: 'Pharmacogenomic testing for specific drug dosing is advised. Monitor therapeutic response closely.'
-    },
-    {
-        id: '3',
-        gene: 'APOE',
-        variant: 'ε3/ε3',
-        riskLevel: 'LOW',
-        phenotype: 'Neutral Risk Profile',
-        description: 'Common genotype associated with average risk for late-onset Alzheimer’s disease and cardiovascular disease relative to the general population.',
-        recommendation: 'Standard preventative lifestyle measures. No specific clinical intervention required.'
-    }
-];
+import AnalysisPanel from '@/components/dashboard/AnalysisPanel';
+import { EmptyState } from '@/components/dashboard/StatusStates';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Dashboard() {
     const supabase = createClient();
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('overview');
     const [uploadedFileUrl, setUploadedFileUrl] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        // Simulate initial system analysis/loading
-        const timer = setTimeout(() => setIsLoading(false), 2000);
-        return () => clearTimeout(timer);
-    }, []);
+    const [showAnalysis, setShowAnalysis] = useState(false);
+    const [uploadFileName, setUploadFileName] = useState(null);
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
@@ -65,8 +30,18 @@ export default function Dashboard() {
         router.replace('/');
     };
 
-    const handleUploadScale = (url) => {
+    // Called by VcfUploader once upload is done and a signed URL is ready
+    const handleUploadComplete = (url, fileName) => {
         setUploadedFileUrl(url);
+        setUploadFileName(fileName);
+        setShowAnalysis(true);
+    };
+
+    // Reset everything for a new scan
+    const handleNewScan = () => {
+        setUploadedFileUrl(null);
+        setUploadFileName(null);
+        setShowAnalysis(false);
     };
 
     return (
@@ -135,16 +110,17 @@ export default function Dashboard() {
 
             {/* Main Content Area */}
             <main className="flex-1 overflow-y-auto z-10 relative scrollbar-thin scrollbar-thumb-cyan-900 scrollbar-track-transparent">
-                {/* Background Watermark - NIRMAY Logo Brand Anchor */}
+                {/* Background Watermark - DNA Brand Anchor */}
                 <div className="fixed inset-0 flex items-center justify-center pointer-events-none -z-10 overflow-hidden">
                     <div className="relative opacity-[0.03] blur-sm scale-150 grayscale mix-blend-screen">
                         <Dna strokeWidth={0.5} className="w-[800px] h-[800px] text-cyan-500/50" />
                     </div>
                 </div>
 
+                {/* Top Header */}
                 <header className="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-md border-b border-cyan-500/10 px-8 py-4 flex justify-between items-center">
                     <div className="flex items-center gap-6">
-                        {/* NIRMAY LOGO - Top Left */}
+                        {/* NIRMAY LOGO */}
                         <Link href="/dashboard" className="flex items-center gap-3 group">
                             <div className="relative flex items-center justify-center">
                                 <div className="absolute inset-0 bg-cyan-500 blur-lg opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-full" />
@@ -152,16 +128,13 @@ export default function Dashboard() {
                                     <Dna className="w-5 h-5 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
                                 </div>
                             </div>
-
                             <div className="flex flex-col">
                                 <span className="text-xl font-bold tracking-widest text-slate-100 group-hover:text-white transition-colors">NIRMAY</span>
                             </div>
                         </Link>
 
-                        {/* Divider */}
                         <div className="h-8 w-px bg-cyan-500/10 mx-2 hidden md:block"></div>
 
-                        {/* Page Title / Breadcrumb */}
                         <div className="hidden md:block">
                             <h2 className="text-sm font-light tracking-wide text-slate-400 uppercase">
                                 Command <span className="text-cyan-500/80 font-semibold">Center</span>
@@ -169,13 +142,11 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-
                     <div className="flex items-center gap-4">
                         <div className="px-3 py-1 rounded border border-cyan-500/20 bg-cyan-950/30 text-xs text-cyan-400 font-mono">
                             SESSION ID: 8X-921
                         </div>
                         <div className="w-8 h-8 rounded-full bg-slate-800 border border-cyan-500/20 overflow-hidden">
-                            {/* User Avatar Placeholder */}
                             <div className="w-full h-full bg-gradient-to-br from-cyan-500/20 to-blue-600/20"></div>
                         </div>
                     </div>
@@ -214,63 +185,113 @@ export default function Dashboard() {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
-                        {/* Main Interaction Area - Upload & Visuals */}
+                        {/* Main Interaction Area - Upload & Analysis */}
                         <div className="lg:col-span-2 space-y-6">
-                            <GlassPanel title="Genomic Sequence Upload" action={<span className="text-cyan-400 cursor-pointer hover:underline">View History</span>}>
-                                <div className="min-h-[300px] flex flex-col justify-center">
-                                    {uploadedFileUrl ? (
-                                        <div className="p-6 bg-emerald-950/20 border border-emerald-500/20 rounded-xl flex items-center gap-4 relative overflow-hidden group">
-                                            <div className="absolute inset-0 bg-emerald-500/5 group-hover:bg-emerald-500/10 transition-colors" />
 
-                                            <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 z-10">
-                                                <FileText />
+                            {/* ── Upload Section ── */}
+                            <AnimatePresence mode="wait">
+                                {!showAnalysis ? (
+                                    <motion.div
+                                        key="uploader"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                    >
+                                        <GlassPanel
+                                            title="Genomic Sequence Upload"
+                                            action={
+                                                <span className="text-cyan-400 cursor-pointer hover:underline">
+                                                    View History
+                                                </span>
+                                            }
+                                        >
+                                            <div className="min-h-[300px] flex flex-col justify-center">
+                                                <VcfUploader onUploadComplete={handleUploadComplete} />
                                             </div>
-                                            <div className="z-10 flex-1">
-                                                <h4 className="font-semibold text-emerald-100">Upload Transmission Complete</h4>
-                                                <p className="text-sm text-emerald-400/60">Sequence data encrypted and stored in secure vault.</p>
-                                            </div>
-                                            <button
-                                                onClick={() => setUploadedFileUrl(null)}
-                                                className="z-10 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs uppercase tracking-wide rounded border border-emerald-500/30 transition-all"
-                                            >
-                                                Initialize New Scan
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="relative">
-                                            {/* We wrap the existing VcfUploader components but might need to style them internally. 
-                                               For now, let's assume it accepts className or we style via global CSS overrides in this scope. 
-                                            */}
-                                            <div className="dashboard-uploader-wrapper">
-                                                <VcfUploader onUploadComplete={handleUploadScale} />
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </GlassPanel>
-
-                            {/* Risk Analysis Result Integration */}
-                            <GlassPanel title="Genomic Risk Assessment Model">
-                                {isLoading ? (
-                                    <LoadingState />
+                                        </GlassPanel>
+                                    </motion.div>
                                 ) : (
-                                    <RiskResults data={mockRiskData} />
+                                    <motion.div
+                                        key="upload-done"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                    >
+                                        <GlassPanel title="Sequence Upload">
+                                            <div className="flex items-center gap-4 py-2">
+                                                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                                                    <CheckCircle2 className="w-5 h-5" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-emerald-200">Upload Transmission Complete</p>
+                                                    <p className="text-xs text-slate-500 mt-0.5 font-mono truncate">
+                                                        Sequence data encrypted and stored in secure vault.
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={handleNewScan}
+                                                    className="flex-shrink-0 px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white text-xs uppercase tracking-wide rounded-lg border border-slate-700/80 hover:border-slate-600 transition-all"
+                                                >
+                                                    New Scan
+                                                </button>
+                                            </div>
+                                        </GlassPanel>
+                                    </motion.div>
                                 )}
+                            </AnimatePresence>
+
+                            {/* ── Genomic Risk Assessment ── */}
+                            <GlassPanel title="Genomic Risk Assessment Model">
+                                <AnimatePresence mode="wait">
+                                    {!showAnalysis ? (
+                                        <motion.div
+                                            key="empty"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                        >
+                                            <EmptyState />
+                                        </motion.div>
+                                    ) : (
+                                        <motion.div
+                                            key="analysis"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                        >
+                                            <AnalysisPanel
+                                                vcfUrl={uploadedFileUrl}
+                                                drugs={[]} // Empty = backend uses all default drugs
+                                                onReset={handleNewScan}
+                                            />
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </GlassPanel>
                         </div>
 
-                        {/* Recent Alerts / Status Bar */}
+                        {/* System Diagnostics Sidebar */}
                         <div className="space-y-6">
                             <GlassPanel title="System Diagnostics" className="h-full">
                                 <div className="space-y-6">
                                     <StatusRow label="Database Shard 01" status="Operational" />
                                     <StatusRow label="Encryption Layer" status="Active" isSecure />
-                                    <StatusRow label="AI Inference Engine" status="Standby" />
+                                    <StatusRow
+                                        label="AI Inference Engine"
+                                        status={showAnalysis ? "Active" : "Standby"}
+                                    />
                                     <StatusRow label="API Gateway" status="Operational" />
 
                                     <div className="pt-6 border-t border-cyan-500/10">
                                         <h4 className="text-xs uppercase text-cyan-500/50 mb-4 tracking-widest">Recent Events</h4>
                                         <div className="space-y-3">
+                                            {showAnalysis && (
+                                                <EventItem
+                                                    time="Now"
+                                                    text="VCF analysis dispatched to AI engine"
+                                                    type="success"
+                                                />
+                                            )}
                                             <EventItem time="10:42 AM" text="System backup completed" type="info" />
                                             <EventItem time="09:15 AM" text="New user login verified" type="success" />
                                             <EventItem time="08:30 AM" text="Update patch v2.4 applied" type="info" />
@@ -282,7 +303,7 @@ export default function Dashboard() {
                     </div>
                 </div>
             </main>
-        </div >
+        </div>
     );
 }
 
