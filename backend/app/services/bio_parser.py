@@ -3,16 +3,21 @@ import requests
 import tempfile
 import os
 
+import time
+
 def download_temp_vcf(vcf_url: str) -> str:
     """
     Downloads a VCF file from a URL to a temporary file.
     Returns the path to the temporary file.
     """
+    start = time.time()
     # For testing/hackathon, if it's a local path or filename, just return it
     if os.path.exists(vcf_url):
+        print(f"[PARSER] Using local VCF: {vcf_url}")
         return vcf_url
         
-    response = requests.get(vcf_url)
+    print(f"[PARSER] Downloading VCF from: {vcf_url}")
+    response = requests.get(vcf_url, timeout=30)
     response.raise_for_status()
     
     # Create a temp file
@@ -20,6 +25,7 @@ def download_temp_vcf(vcf_url: str) -> str:
     with os.fdopen(fd, 'wb') as tmp:
         tmp.write(response.content)
     
+    print(f"[PARSER] VCF downloaded in {time.time() - start:.2f}s")
     return path
 
 def parse_genomic_data(vcf_path: str):
