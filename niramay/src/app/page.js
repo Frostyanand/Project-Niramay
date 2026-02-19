@@ -1,40 +1,27 @@
 
-"use client";
-
-import VcfUploader from "@/components/VcfUploader";
-import TrafficLightDashboard from "@/components/TrafficLightDashboard";
+import AuthForm from "@/components/AuthForm";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background text-foreground space-y-8">
-      <div className="text-center space-y-4 mb-4">
-        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
-          Niramay Clinical Dashboard
+    <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-background text-foreground">
+      <div className="z-10 max-w-5xl w-full items-center justify-center font-mono text-sm lg:flex mb-8">
+        <h1 className="text-4xl font-bold tracking-tight text-center w-full">
+          Nirmay
         </h1>
+      </div>
+
+      <div className="w-full max-w-md">
+        <AuthForm />
+      </div>
+
+      <div className="mt-8 text-center">
         <p className="text-xl text-muted-foreground">
-          Advanced Pharmacogenomics Risk Analysis
+          Secure Medical Application Scaffold
+        </p>
+        <p className="mt-4 text-sm text-gray-500">
+          Ready for development.
         </p>
       </div>
-
-      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl items-start">
-        <section className="flex flex-col space-y-4">
-          <div className="flex items-center space-x-2 pb-2 border-b">
-            <h2 className="text-2xl font-semibold tracking-tight">Step 1: Upload Data</h2>
-          </div>
-          <VcfUploader />
-        </section>
-
-        <section className="flex flex-col space-y-4">
-          <div className="flex items-center space-x-2 pb-2 border-b">
-            <h2 className="text-2xl font-semibold tracking-tight">Step 2: Risk Analysis</h2>
-          </div>
-          <TrafficLightDashboard />
-        </section>
-      </div>
-
-      <footer className="mt-16 text-sm text-muted-foreground">
-        &copy; {new Date().getFullYear()} Niramay. Secure Clinical Genomics.
-      </footer>
     </main>
   );
 }
