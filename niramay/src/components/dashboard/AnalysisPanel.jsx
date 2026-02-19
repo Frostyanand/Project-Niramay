@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Dna, Loader2, ServerCrash, AlertCircle, FlaskConical } from 'lucide-react';
+import { Dna, Loader2, ServerCrash, AlertCircle, FlaskConical, Pill } from 'lucide-react';
 import RiskResults from '@/components/dashboard/RiskResults';
+
+// ─── Supported drugs ─────────────────────────────────────────────────────────
+const SUPPORTED_DRUGS = ['CODEINE', 'WARFARIN', 'CLOPIDOGREL', 'SIMVASTATIN', 'AZATHIOPRINE', 'FLUOROURACIL'];
 
 // ─── Severity → Risk Level mapping from the backend ─────────────────────────
 const SEVERITY_TO_RISK = {
@@ -22,8 +25,6 @@ function transformBackendData(backendResults) {
         const profile = item.pharmacogenomic_profile;
         const risk = item.risk_assessment;
         const rec = item.clinical_recommendation;
-        // explanation is an object: { summary, citations, rag_source, model_used }
-        // OR a string fallback. Handle both safely.
         const explanation = item.llm_generated_explanation;
         const explanationText = explanation
             ? (typeof explanation === 'object' ? explanation.summary : explanation)
@@ -42,6 +43,8 @@ function transformBackendData(backendResults) {
             drug: item.drug,
             description: explanationText || rec?.action || 'No additional clinical description available.',
             recommendation: rec?.action || 'Follow standard clinical protocols.',
+            dosingRecommendation: rec?.dosing_recommendation || '',
+            alternativeDrugs: rec?.alternative_drugs || [],
             confidence: risk?.confidence_score,
             guidelineSource: rec?.guideline_source || 'CPIC',
             detectedVariants: profile?.detected_variants || [],
@@ -49,6 +52,48 @@ function transformBackendData(backendResults) {
             modelUsed,
         };
     });
+}
+
+// ─── Drug Selector Component ─────────────────────────────────────────────────
+function DrugSelector({ selectedDrugs, onToggle, customDrug, onCustomChange }) {
+    return (
+        <div className="space-y-3">
+            <div className="flex items-center gap-2 mb-2">
+                <Pill className="w-4 h-4 text-cyan-400" />
+                <span className="text-xs uppercase tracking-widest text-slate-400 font-semibold">Select Drugs to Analyze</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+                {SUPPORTED_DRUGS.map(drug => {
+                    const isSelected = selectedDrugs.includes(drug);
+                    return (
+                        <button
+                            key={drug}
+                            onClick={() => onToggle(drug)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wide border transition-all duration-200 ${isSelected
+                                ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300 shadow-[0_0_8px_rgba(6,182,212,0.15)]'
+                                : 'bg-slate-900/50 border-slate-700/50 text-slate-500 hover:border-slate-600 hover:text-slate-300'
+                                }`}
+                        >
+                            {isSelected && <span className="mr-1">✓</span>}
+                            {drug}
+                        </button>
+                    );
+                })}
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+                <input
+                    type="text"
+                    placeholder="Or type custom drugs (comma-separated)..."
+                    value={customDrug}
+                    onChange={(e) => onCustomChange(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-700/50 text-xs text-slate-300 font-mono placeholder-slate-600 focus:outline-none focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20 transition-all"
+                />
+            </div>
+            <p className="text-[10px] text-slate-600 font-mono">
+                {selectedDrugs.length === 0 ? 'No drugs selected — all 6 will be analyzed by default' : `${selectedDrugs.length} drug(s) selected`}
+            </p>
+        </div>
+    );
 }
 
 // ─── Status stages for the visual pipeline ───────────────────────────────────
@@ -63,7 +108,6 @@ const PIPELINE_STAGES = [
 function AnalysisLoadingState({ stage }) {
     return (
         <div className="flex flex-col items-center justify-center p-10 min-h-[300px] w-full gap-6">
-            {/* Animated DNA Spinner with glow */}
             <div className="relative">
                 <div className="absolute inset-0 bg-cyan-500/20 blur-2xl rounded-full animate-pulse" />
                 <motion.div
@@ -74,8 +118,6 @@ function AnalysisLoadingState({ stage }) {
                     <Dna className="w-12 h-12 text-cyan-400 drop-shadow-[0_0_12px_rgba(34,211,238,0.6)]" strokeWidth={1} />
                 </motion.div>
             </div>
-
-            {/* Pipeline progress */}
             <div className="w-full max-w-sm space-y-3">
                 {PIPELINE_STAGES.map((s, i) => {
                     const isDone = i < stage;
@@ -95,22 +137,13 @@ function AnalysisLoadingState({ stage }) {
                                     : 'border-slate-700 bg-slate-900'
                                 }`}>
                                 {isDone && (
-                                    <motion.div
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        className="w-1.5 h-1.5 rounded-full bg-emerald-200"
-                                    />
+                                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-1.5 h-1.5 rounded-full bg-emerald-200" />
                                 )}
                                 {isCurrent && (
-                                    <motion.div
-                                        animate={{ opacity: [0.4, 1, 0.4] }}
-                                        transition={{ duration: 1.2, repeat: Infinity }}
-                                        className="w-1.5 h-1.5 rounded-full bg-cyan-300"
-                                    />
+                                    <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1.2, repeat: Infinity }} className="w-1.5 h-1.5 rounded-full bg-cyan-300" />
                                 )}
                             </div>
-                            <span className={`text-xs font-mono transition-colors ${isDone ? 'text-emerald-400' : isCurrent ? 'text-cyan-300' : 'text-slate-600'
-                                }`}>
+                            <span className={`text-xs font-mono transition-colors ${isDone ? 'text-emerald-400' : isCurrent ? 'text-cyan-300' : 'text-slate-600'}`}>
                                 {s.label}
                             </span>
                         </motion.div>
@@ -158,25 +191,44 @@ function AnalysisErrorState({ message, isOffline, onRetry }) {
 }
 
 // ─── Main Analysis Panel Component ───────────────────────────────────────────
-export default function AnalysisPanel({ vcfUrl, drugs, onReset }) {
-    const [status, setStatus] = useState('idle'); // idle | analyzing | done | error
+export default function AnalysisPanel({ vcfUrl, drugs: initialDrugs, onReset }) {
+    const [status, setStatus] = useState('idle'); // idle | selecting | analyzing | done | error
     const [pipelineStage, setPipelineStage] = useState(0);
     const [results, setResults] = useState(null);
+    const [rawResponse, setRawResponse] = useState(null);
     const [error, setError] = useState(null);
     const [isOffline, setIsOffline] = useState(false);
 
+    // Drug selection state
+    const [selectedDrugs, setSelectedDrugs] = useState(SUPPORTED_DRUGS);
+    const [customDrug, setCustomDrug] = useState('');
+
     useEffect(() => {
         if (vcfUrl) {
-            runAnalysis();
+            setStatus('selecting');
         }
     }, [vcfUrl]);
+
+    const handleToggleDrug = (drug) => {
+        setSelectedDrugs(prev =>
+            prev.includes(drug) ? prev.filter(d => d !== drug) : [...prev, drug]
+        );
+    };
+
+    const getEffectiveDrugs = () => {
+        let drugs = [...selectedDrugs];
+        if (customDrug.trim()) {
+            const custom = customDrug.split(',').map(d => d.trim().toUpperCase()).filter(Boolean);
+            drugs = [...drugs, ...custom];
+        }
+        return drugs.length > 0 ? drugs : SUPPORTED_DRUGS;
+    };
 
     const runAnalysis = async () => {
         setStatus('analyzing');
         setError(null);
         setPipelineStage(0);
 
-        // Simulate pipeline stage progression for UX
         const stageTimer = setInterval(() => {
             setPipelineStage(prev => {
                 if (prev < PIPELINE_STAGES.length - 1) return prev + 1;
@@ -191,12 +243,12 @@ export default function AnalysisPanel({ vcfUrl, drugs, onReset }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     vcf_url: vcfUrl,
-                    drugs: drugs || [],
+                    drugs: getEffectiveDrugs(),
                 }),
             });
 
             clearInterval(stageTimer);
-            setPipelineStage(PIPELINE_STAGES.length); // Mark all as done visually
+            setPipelineStage(PIPELINE_STAGES.length);
 
             const data = await response.json();
 
@@ -205,7 +257,7 @@ export default function AnalysisPanel({ vcfUrl, drugs, onReset }) {
                 throw new Error(data.error || data.detail || 'Backend returned an error.');
             }
 
-            // Transform the backend results to the RiskResults format
+            setRawResponse(data);
             const transformed = transformBackendData(data.results);
             setResults(transformed);
             setStatus('done');
@@ -227,6 +279,31 @@ export default function AnalysisPanel({ vcfUrl, drugs, onReset }) {
     return (
         <div className="w-full">
             <AnimatePresence mode="wait">
+                {status === 'selecting' && (
+                    <motion.div
+                        key="selecting"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="space-y-6"
+                    >
+                        <DrugSelector
+                            selectedDrugs={selectedDrugs}
+                            onToggle={handleToggleDrug}
+                            customDrug={customDrug}
+                            onCustomChange={setCustomDrug}
+                        />
+                        <div className="flex justify-end">
+                            <button
+                                onClick={runAnalysis}
+                                className="px-6 py-2.5 rounded-lg text-xs uppercase tracking-widest font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] transition-all duration-300"
+                            >
+                                ▶ Run Analysis
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+
                 {status === 'analyzing' && (
                     <motion.div
                         key="loading"
@@ -274,10 +351,11 @@ export default function AnalysisPanel({ vcfUrl, drugs, onReset }) {
                             </button>
                         </div>
 
-                        <RiskResults data={results} />
+                        <RiskResults data={results} rawResponse={rawResponse} />
                     </motion.div>
                 )}
             </AnimatePresence>
         </div>
     );
 }
+

@@ -8,9 +8,10 @@ import {
 } from 'lucide-react';
 import { EmptyState } from '@/components/dashboard/StatusStates';
 
-export default function RiskResults({ data }) {
+export default function RiskResults({ data, rawResponse }) {
     const [expandedCards, setExpandedCards] = useState([]);
     const [jsonOpen, setJsonOpen] = useState(false);
+    const [copySuccess, setCopySuccess] = useState(false);
 
     if (!data || data.length === 0) {
         return <EmptyState />;
@@ -31,15 +32,19 @@ export default function RiskResults({ data }) {
     };
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+        const exportData = rawResponse || data;
+        navigator.clipboard.writeText(JSON.stringify(exportData, null, 2));
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
     };
 
     const handleDownload = () => {
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const exportData = rawResponse || data;
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'clinical-risk-report.json';
+        a.download = `niramay-pharmacogenomic-report-${new Date().toISOString().slice(0, 10)}.json`;
         a.click();
         URL.revokeObjectURL(url);
     };
@@ -191,6 +196,26 @@ export default function RiskResults({ data }) {
                                                                 {item.recommendation}
                                                             </p>
                                                         </div>
+                                                        {item.dosingRecommendation && (
+                                                            <div>
+                                                                <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Dosing Recommendation</span>
+                                                                <p className="text-xs text-slate-300 bg-slate-950/50 p-2 rounded border border-white/5 leading-relaxed">
+                                                                    {item.dosingRecommendation}
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                        {item.alternativeDrugs && item.alternativeDrugs.length > 0 && (
+                                                            <div>
+                                                                <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Alternative Drugs</span>
+                                                                <div className="flex flex-wrap gap-1.5">
+                                                                    {item.alternativeDrugs.map((alt, i) => (
+                                                                        <span key={i} className="text-[10px] font-mono px-2 py-0.5 rounded border border-cyan-500/20 text-cyan-400/80 bg-cyan-950/30">
+                                                                            {alt}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                         {(item.confidence || item.guidelineSource) && (
                                                             <div className="flex items-center gap-3 mt-1 flex-wrap">
                                                                 {item.confidence && (
@@ -237,10 +262,11 @@ export default function RiskResults({ data }) {
                             <div className="flex gap-2">
                                 <button
                                     onClick={handleCopy}
-                                    className="p-1.5 hover:bg-cyan-500/10 rounded text-cyan-400 transition-colors"
+                                    className="p-1.5 hover:bg-cyan-500/10 rounded text-cyan-400 transition-colors flex items-center gap-1"
                                     title="Copy to Clipboard"
                                 >
                                     <Copy className="w-4 h-4" />
+                                    {copySuccess && <span className="text-[10px] text-emerald-400">Copied!</span>}
                                 </button>
                                 <button
                                     onClick={handleDownload}
@@ -251,9 +277,9 @@ export default function RiskResults({ data }) {
                                 </button>
                             </div>
                         </div>
-                        <div className="p-4 overflow-x-auto">
-                            <pre className="text-[10px] font-mono text-cyan-200/70 leading-relaxed">
-                                {JSON.stringify(data, null, 2)}
+                        <div className="p-4 overflow-x-auto max-h-96">
+                            <pre className="text-[10px] font-mono text-cyan-200/70 leading-relaxed whitespace-pre-wrap">
+                                {JSON.stringify(rawResponse || data, null, 2)}
                             </pre>
                         </div>
                     </motion.div>
