@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 
 export default function Footer() {
     const pathname = usePathname();
-    const isDashboard = pathname?.startsWith("/dashboard");
+    const isDashboard = pathname?.startsWith("/dashboard") || pathname?.startsWith("/analytics");
 
     if (isDashboard) return null;
 
@@ -50,6 +50,7 @@ export default function Footer() {
                                 { label: "Features", href: "/#features" },
                                 { label: "How it Works", href: "/#how-it-works" },
                                 { label: "Dashboard", href: "/dashboard" },
+                                { label: "Analytics", href: "/analytics" },
                             ].map((link) => (
                                 <li key={link.label}>
                                     <Link

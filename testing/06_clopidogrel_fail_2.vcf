@@ -1,0 +1,14 @@
+##fileformat=VCFv4.2
+##source=NiramaySynthetic
+##INFO=<ID=RS,Number=1,Type=String,Description="dbSNP ID">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr10	94762601	rs4986893	G	A	.	PASS	.
+
+# ---------------------------------------------------------
+# EXPECTED RESULTS (Test Case 06)
+# ---------------------------------------------------------
+# INPUT DRUG: Clopidogrel
+#
+# 1. Clopidogrel -> INEFFECTIVE / CRITICAL (CYP2C19 *3)
+#    Action: Avoid clopidogrel. Use Prasugrel or Ticagrelor.
+# ---------------------------------------------------------

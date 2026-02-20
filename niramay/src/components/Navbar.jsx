@@ -17,7 +17,7 @@ export default function Navbar() {
     const [user, setUser] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
 
-    const isDashboard = pathname?.startsWith("/dashboard");
+    const isDashboard = pathname?.startsWith("/dashboard") || pathname?.startsWith("/analytics");
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 40);

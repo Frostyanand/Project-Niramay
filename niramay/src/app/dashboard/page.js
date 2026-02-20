@@ -177,7 +177,7 @@ export default function Dashboard() {
 
                     {/* Centre nav links */}
                     <div className="hidden md:flex items-center gap-1">
-                        {[{ label: 'Home', href: '/' }, { label: 'About', href: '/about' }, { label: 'Features', href: '/#features' }].map(({ label, href }) => (
+                        {[{ label: 'Home', href: '/' }, { label: 'About', href: '/about' }, { label: 'Features', href: '/#features' }, { label: 'Analytics', href: '/analytics' }].map(({ label, href }) => (
                             <Link
                                 key={label}
                                 href={href}

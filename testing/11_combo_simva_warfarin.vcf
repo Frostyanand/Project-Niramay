@@ -1,0 +1,15 @@
+##fileformat=VCFv4.2
+##source=NiramaySynthetic
+##INFO=<ID=RS,Number=1,Type=String,Description="dbSNP ID">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr12	21178615	rs4149056	T	C	.	PASS	.
+chr10	94942290	rs1799853	C	T	.	PASS	.
+
+# ---------------------------------------------------------
+# EXPECTED RESULTS (Test Case 11)
+# ---------------------------------------------------------
+# INPUT DRUGS: Simvastatin, Warfarin
+#
+# 1. Simvastatin -> TOXIC / CRITICAL (SLCO1B1 *5)
+# 2. Warfarin    -> ADJUST DOSAGE / MODERATE (CYP2C9 *2)
+# ---------------------------------------------------------

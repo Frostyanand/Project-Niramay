@@ -1,0 +1,14 @@
+##fileformat=VCFv4.2
+##source=NiramaySynthetic
+##INFO=<ID=RS,Number=1,Type=String,Description="dbSNP ID">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr1	55555	rs9999999	A	T	.	PASS	.
+
+# ---------------------------------------------------------
+# EXPECTED RESULTS (Test Case 15)
+# ---------------------------------------------------------
+# INPUT: Any Drug
+#
+# 1. Any Drug -> SAFE (Wild-Type)
+#    (The variant rs9999999 is not in the CPIC database)
+# ---------------------------------------------------------

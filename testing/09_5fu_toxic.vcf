@@ -1,0 +1,14 @@
+##fileformat=VCFv4.2
+##source=NiramaySynthetic
+##INFO=<ID=RS,Number=1,Type=String,Description="dbSNP ID">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr1	97915614	rs3918290	G	A	.	PASS	.
+
+# ---------------------------------------------------------
+# EXPECTED RESULTS (Test Case 09)
+# ---------------------------------------------------------
+# INPUT DRUG: Fluorouracil
+#
+# 1. Fluorouracil -> TOXIC / CRITICAL (DPYD *2A)
+#    Action: Extreme risk of severe/fatal toxicity. Avoid 5-FU.
+# ---------------------------------------------------------

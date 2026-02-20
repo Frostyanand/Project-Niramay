@@ -1,0 +1,14 @@
+##fileformat=VCFv4.2
+##source=NiramaySynthetic
+##INFO=<ID=RS,Number=1,Type=String,Description="dbSNP ID">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr6	18139228	rs1800460	G	A	.	PASS	.
+
+# ---------------------------------------------------------
+# EXPECTED RESULTS (Test Case 08)
+# ---------------------------------------------------------
+# INPUT DRUG: Azathioprine
+#
+# 1. Azathioprine -> TOXIC / CRITICAL (TPMT *3A)
+#    Action: Contraindication. Reduce dose to 10%.
+# ---------------------------------------------------------

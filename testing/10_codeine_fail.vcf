@@ -1,0 +1,14 @@
+##fileformat=VCFv4.2
+##source=NiramaySynthetic
+##INFO=<ID=RS,Number=1,Type=String,Description="dbSNP ID">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr22	42523594	rs3892097	C	T	.	PASS	.
+
+# ---------------------------------------------------------
+# EXPECTED RESULTS (Test Case 10)
+# ---------------------------------------------------------
+# INPUT DRUG: Codeine
+#
+# 1. Codeine -> INEFFECTIVE / HIGH (CYP2D6 *4)
+#    Action: Avoid codeine. Use morphine or non-opioid analgesic.
+# ---------------------------------------------------------

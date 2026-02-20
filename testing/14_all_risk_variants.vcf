@@ -1,0 +1,26 @@
+##fileformat=VCFv4.2
+##source=NiramaySynthetic
+##INFO=<ID=RS,Number=1,Type=String,Description="dbSNP ID">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr12	21178615	rs4149056	T	C	.	PASS	.
+chr10	94942290	rs1799853	C	T	.	PASS	.
+chr10	94981296	rs1057910	A	C	.	PASS	.
+chr10	94775422	rs4244285	G	A	.	PASS	.
+chr10	94762601	rs4986893	G	A	.	PASS	.
+chr6	18130919	rs1142345	A	G	.	PASS	.
+chr6	18139228	rs1800460	G	A	.	PASS	.
+chr1	97915614	rs3918290	G	A	.	PASS	.
+chr22	42523594	rs3892097	C	T	.	PASS	.
+
+# ---------------------------------------------------------
+# EXPECTED RESULTS (Test Case 14)
+# ---------------------------------------------------------
+# INPUT: Select ALL DRUGS
+#
+# 1. Simvastatin   -> TOXIC
+# 2. Warfarin      -> ADJUST DOSAGE (Multiple variants -> High Risk)
+# 3. Clopidogrel   -> INEFFECTIVE
+# 4. Azathioprine  -> TOXIC
+# 5. Fluorouracil  -> TOXIC
+# 6. Codeine       -> INEFFECTIVE
+# ---------------------------------------------------------

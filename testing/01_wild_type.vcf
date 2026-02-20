@@ -1,0 +1,20 @@
+##fileformat=VCFv4.2
+##fileDate=20240220
+##source=NiramaySyntheticGenerator
+##INFO=<ID=RS,Number=1,Type=String,Description="dbSNP ID">
+##INFO=<ID=GENE,Number=1,Type=String,Description="Gene Symbol">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr1	100	rs1234	G	A	.	PASS	RS=rs1234;GENE=DUMMY
+
+# ---------------------------------------------------------
+# EXPECTED RESULTS (Test Case 01)
+# ---------------------------------------------------------
+# INPUT DRUGS: Simvastatin, Warfarin, Clopidogrel, Azathioprine, Fluorouracil, Codeine
+#
+# 1. Simvastatin   -> SAFE (SLCO1B1 *1/*1)
+# 2. Warfarin      -> SAFE (CYP2C9 *1/*1)
+# 3. Clopidogrel   -> SAFE (CYP2C19 *1/*1)
+# 4. Azathioprine  -> SAFE (TPMT *1/*1)
+# 5. Fluorouracil  -> SAFE (DPYD *1/*1)
+# 6. Codeine       -> SAFE (CYP2D6 *1/*1)
+# ---------------------------------------------------------

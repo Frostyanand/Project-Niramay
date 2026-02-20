@@ -1,0 +1,17 @@
+##fileformat=VCFv4.2
+##source=NiramaySynthetic
+##INFO=<ID=RS,Number=1,Type=String,Description="dbSNP ID">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr6	18130919	rs1142345	A	G	.	PASS	.
+chr1	97915614	rs3918290	G	A	.	PASS	.
+
+# ---------------------------------------------------------
+# EXPECTED RESULTS (Test Case 12)
+# ---------------------------------------------------------
+# INPUT DRUGS: Azathioprine, Fluorouracil
+#
+# 1. Azathioprine -> TOXIC / CRITICAL (TPMT *3C)
+# 2. Fluorouracil -> TOXIC / CRITICAL (DPYD *2A)
+#
+# ACTION: Extreme caution. Both drugs are contraindicated.
+# ---------------------------------------------------------

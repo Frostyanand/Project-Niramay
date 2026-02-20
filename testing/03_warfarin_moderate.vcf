@@ -1,0 +1,14 @@
+##fileformat=VCFv4.2
+##source=NiramaySynthetic
+##INFO=<ID=RS,Number=1,Type=String,Description="dbSNP ID">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr10	94942290	rs1799853	C	T	.	PASS	.
+
+# ---------------------------------------------------------
+# EXPECTED RESULTS (Test Case 03)
+# ---------------------------------------------------------
+# INPUT DRUG: Warfarin
+#
+# 1. Warfarin -> ADJUST DOSAGE / MODERATE (CYP2C9 *2)
+#    Action: Decrease calculated initial dose by 15-30%.
+# ---------------------------------------------------------

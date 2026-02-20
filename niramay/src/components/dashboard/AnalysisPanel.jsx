@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dna, Loader2, ServerCrash, AlertCircle, FlaskConical, Pill } from 'lucide-react';
 import RiskResults from '@/components/dashboard/RiskResults';
+import AnalyticsDashboard from '@/components/dashboard/AnalyticsDashboard';
+import { createClient } from '@/lib/supabaseClient';
 
 // ─── Supported drugs ─────────────────────────────────────────────────────────
 const SUPPORTED_DRUGS = ['CODEINE', 'WARFARIN', 'CLOPIDOGREL', 'SIMVASTATIN', 'AZATHIOPRINE', 'FLUOROURACIL'];
@@ -249,6 +251,7 @@ export default function AnalysisPanel({ vcfUrl, drugs: initialDrugs, onReset }) 
     const [rawResponse, setRawResponse] = useState(null);
     const [error, setError] = useState(null);
     const [isOffline, setIsOffline] = useState(false);
+    const [resultView, setResultView] = useState('analytics'); // 'analytics' | 'raw'
 
     const [selectedDrugs, setSelectedDrugs] = useState(SUPPORTED_DRUGS);
     const [customDrug, setCustomDrug] = useState('');
@@ -308,6 +311,24 @@ export default function AnalysisPanel({ vcfUrl, drugs: initialDrugs, onReset }) 
             setRawResponse(data);
             const transformed = transformBackendData(data.results);
             setResults(transformed);
+
+            // ── Save to Supabase ──────────────────────────────────────────
+            try {
+                const supabase = createClient();
+                const { data: userData } = await supabase.auth.getUser();
+                if (userData?.user) {
+                    await supabase.from('analysis_results').insert({
+                        user_id: userData.user.id,
+                        status: 'completed',
+                        results_data: transformed,
+                        raw_response: data,
+                        drugs_analyzed: getEffectiveDrugs(),
+                    });
+                }
+            } catch (saveErr) {
+                console.warn('Could not save analysis to Supabase:', saveErr);
+            }
+
             setStatus('done');
 
         } catch (err) {
@@ -378,11 +399,35 @@ export default function AnalysisPanel({ vcfUrl, drugs: initialDrugs, onReset }) 
                             display: 'flex', alignItems: 'center', gap: 12,
                             marginBottom: 20, paddingBottom: 16,
                             borderBottom: '1px solid rgba(0,119,182,0.1)',
+                            flexWrap: 'wrap',
                         }}>
                             <FlaskConical style={{ width: 15, height: 15, color: '#0077b6' }} />
                             <p style={{ fontSize: 12, fontFamily: 'monospace', color: '#0096c7', flex: 1 }}>
                                 Analysis complete — {results.length} drug-gene interaction{results.length !== 1 ? 's' : ''} assessed
                             </p>
+
+                            {/* Analytics / Raw toggle */}
+                            <div className="flex rounded-full p-1 mr-2" style={{ background: '#f0f9ff', border: '1px solid rgba(144,224,239,0.3)' }}>
+                                <button
+                                    onClick={() => setResultView('analytics')}
+                                    className={`px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide transition-all ${resultView === 'analytics'
+                                            ? 'bg-white text-[#03045e] shadow-sm'
+                                            : 'text-[#0077b6]/60 hover:text-[#0077b6]'
+                                        }`}
+                                >
+                                    📊 Visual Analytics
+                                </button>
+                                <button
+                                    onClick={() => setResultView('raw')}
+                                    className={`px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide transition-all ${resultView === 'raw'
+                                            ? 'bg-white text-[#03045e] shadow-sm'
+                                            : 'text-[#0077b6]/60 hover:text-[#0077b6]'
+                                        }`}
+                                >
+                                    📋 Raw Risk Results
+                                </button>
+                            </div>
+
                             <button
                                 onClick={onReset}
                                 style={{
@@ -400,7 +445,11 @@ export default function AnalysisPanel({ vcfUrl, drugs: initialDrugs, onReset }) 
                             </button>
                         </div>
 
-                        <RiskResults data={results} rawResponse={rawResponse} />
+                        {resultView === 'analytics' ? (
+                            <AnalyticsDashboard isUnlocked={true} reportData={results} />
+                        ) : (
+                            <RiskResults data={results} rawResponse={rawResponse} />
+                        )}
                     </motion.div>
                 )}
 
